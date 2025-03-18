@@ -1,0 +1,2 @@
+/Users/fridoustin/pantau_app/android/app/.cxx/Debug/3v1a2j2m/x86/CMakeFiles/edit_cache.dir
+/Users/fridoustin/pantau_app/android/app/.cxx/Debug/3v1a2j2m/x86/CMakeFiles/rebuild_cache.dir
