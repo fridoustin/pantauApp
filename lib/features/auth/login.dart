@@ -21,7 +21,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool isLoading = false;
   bool _rememberMe = false;
 
-  // Define FocusNodes for the email and password fields.
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
@@ -40,7 +39,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         SnackBar(content: Text(response), backgroundColor: Colors.red),
       );
     } else {
-      // Navigate to the home screen after successful login
       // ignore: use_build_context_synchronously
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -57,143 +55,143 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate height minus padding to avoid keyboard or system UI conflicts.
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double paddingVertical = MediaQuery.of(context).padding.top + MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: ConstrainedBox(
-              // Ensure the content takes up full height if possible.
-              constraints: BoxConstraints(minHeight: screenHeight - paddingVertical),
-              child: IntrinsicHeight(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        const SizedBox(height: 40),
-                        Image.asset(
-                          'assets/images/login_image.jpg',
-                          height: 220,
-                          width: 220,
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          "Login",
-                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 32),
-                        // Email TextField with explicit focus management.
-                        TextField(
-                          controller: emailController,
-                          focusNode: _emailFocusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Email',
-                            hintStyle: TextStyle(color: Colors.grey[600]),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
+        child: Padding(
+          // Beri padding secukupnya agar tidak menempel di tepi layar
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
+          // Gunakan Column biasa, tanpa scroll
+          child: Column(
+            // Supaya kolom penuh lebar dan bisa diatur alignment-nya
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            // Jarak vertikal diatur spaceEvenly agar terlihat rapi
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Bagian atas (gambar, teks "Login", dll) kita bungkus lagi dengan Column
+              Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Center-kan gambar
+                  Center(
+                    child: Image.asset(
+                      'assets/images/login_image.jpg',
+                      height: 200,
+                      width: 200,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Center-kan teks "Login"
+                  Center(
+                    child: Text(
+                      "Login",
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) {
-                            // Move focus directly to the password field.
-                            FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // TextField Email
+                  TextField(
+                    controller: emailController,
+                    focusNode: _emailFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // TextField Password
+                  TextField(
+                    controller: passwordController,
+                    focusNode: _passwordFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => login(),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Row Remember me (start alignment)
+                  Row(
+                    children: [
+                      Transform.scale(
+                        scale: 1.2,
+                        child: Checkbox(
+                          value: _rememberMe,
+                          activeColor: Colors.blue[800],
+                          checkColor: Colors.white,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              _rememberMe = newValue ?? false;
+                            });
                           },
                         ),
-                        const SizedBox(height: 20),
-                        // Password TextField with explicit focus management.
-                        TextField(
-                          controller: passwordController,
-                          focusNode: _passwordFocusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            hintStyle: TextStyle(color: Colors.grey[600]),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                          obscureText: true,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => login(),
+                      ),
+                      Text(
+                        'Remember me',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
                         ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Transform.scale(
-                                scale: 1.2,
-                                child: Checkbox(
-                                  value: _rememberMe,
-                                  activeColor: Colors.black,
-                                  checkColor: Colors.white,
-                                  onChanged: (bool? newValue) {
-                                    setState(() {
-                                      _rememberMe = newValue ?? false;
-                                    });
-                                  },
-                                ),
-                              ),
-                              Text(
-                                'Remember me',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      child: isLoading
-                          ? const CircularProgressIndicator()
-                          : FilledButton(
-                              onPressed: login,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Colors.blue[800],
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                minimumSize: const Size(350, 50),
-                              ),
-                              child: const Text('Login'),
-                            ),
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
+
+              // Bagian bawah (tombol Login) di tengah
+              Center(
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : FilledButton(
+                        onPressed: login,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.blue[800],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          minimumSize: const Size(400, 50),
+                        ),
+                        child: const Text('Login'),
+                      ),
+              ),
+            ],
           ),
         ),
       ),
