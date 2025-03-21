@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pantau_app/constant/colors.dart';
+import 'package:pantau_app/core/constant/colors.dart';
 
 
 class HomePage extends StatelessWidget {
