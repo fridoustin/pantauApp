@@ -28,4 +28,9 @@ class SupabaseAuthDataSource implements AuthDataSource {
       throw Exception(e.toString());
     }
   }
+  
+  @override
+  Future<void> signOut() async {
+    await client.auth.signOut();
+  }
 }

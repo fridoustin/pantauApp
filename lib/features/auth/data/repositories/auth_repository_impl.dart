@@ -10,4 +10,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signIn({required String email, required String password}) async {
     await dataSource.signIn(email: email, password: password);
   }
+
+  @override
+  Future<void> signOut() async {
+    await dataSource.signOut();
+  }
 }
