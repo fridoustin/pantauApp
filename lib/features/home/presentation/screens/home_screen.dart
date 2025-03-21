@@ -12,6 +12,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) { 
+    final user = Supabase.instance.client.auth.currentUser;
+    final email = user?.email ?? "Unknown";
+    
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Center(
@@ -23,6 +26,9 @@ class HomeScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 24,
               ),
+            ),
+            Text(
+              "Email: $email",
             ),
             OutlinedButton(
               onPressed: () async {
