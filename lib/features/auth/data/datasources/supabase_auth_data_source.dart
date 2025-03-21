@@ -17,6 +17,13 @@ class SupabaseAuthDataSource implements AuthDataSource {
       if (response.user == null) {
         throw Exception('Login failed');
       }
+
+      // Cek role
+      final userRole = response.user?.userMetadata?['role'];
+      if (userRole != 'technician') {
+        await client.auth.signOut();
+        throw Exception('Access denied. Only Technician can login');
+      }
     } catch (e) {
       throw Exception(e.toString());
     }
