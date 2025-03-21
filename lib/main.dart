@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantau_app/features/auth/login.dart';
-import 'package:pantau_app/route.dart';
+import 'package:pantau_app/core/route/route.dart';
+import 'package:pantau_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
