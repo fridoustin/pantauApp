@@ -184,20 +184,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
       
                 Center(
-                  child: authState.isLoading
-                      ? const CircularProgressIndicator()
-                      : FilledButton(
-                          onPressed: login,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.blue[800],
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            minimumSize: const Size(400, 50),
-                          ),
-                          child: const Text('Login'),
+                  child: FilledButton(
+                    onPressed: login,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.blue[800],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      minimumSize: const Size(400, 50),
+                    ),
+                    child: authState.isLoading
+                      ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
                         ),
+                      )
+                      : const Text('Login'),
+                  ),
                 ),
               ],
             ),
