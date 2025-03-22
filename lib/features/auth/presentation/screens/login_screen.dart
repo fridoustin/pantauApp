@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantau_app/core/utils/dialog_utils.dart';
 import 'package:pantau_app/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -45,11 +46,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Listen for authentication state changes
     ref.listen(authStateProvider, (previous, current) {
       if (current.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(current.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
+        showCustomDialog(
+          context: context,
+          contentText: current.errorMessage!,
+          iconData: Icons.info_outline,
         );
       }
 
