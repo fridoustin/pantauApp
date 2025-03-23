@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pantau_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:pantau_app/features/home/home.dart';
+import 'package:pantau_app/features/home/presentation/screens/home_screen.dart';
 
 Route<dynamic> routeGenerators(RouteSettings settings) {
   switch (settings.name) {
-    case HomePage.route :
-      return _buildPageRoute(const HomePage());
+    case HomeScreen.route :
+      return _buildPageRoute(const HomeScreen());
     case LoginScreen.route :
       return _buildPageRoute(const LoginScreen());   
     default:
