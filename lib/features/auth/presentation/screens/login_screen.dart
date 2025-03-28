@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/core/utils/dialog_utils.dart';
 import 'package:pantau_app/features/auth/presentation/providers/auth_providers.dart';
 
@@ -187,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: FilledButton(
                     onPressed: login,
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.blue[800],
+                      backgroundColor: AppColors.primaryColor,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
