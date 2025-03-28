@@ -5,6 +5,7 @@ import 'package:pantau_app/features/auth/data/datasources/supabase_auth_data_sou
 import 'package:pantau_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:pantau_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:pantau_app/features/auth/domain/usecases/signin_usecase.dart';
+import 'package:pantau_app/features/auth/domain/usecases/signout_usecase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final authDataSourceProvider = Provider<AuthDataSource>((ref) {
@@ -17,16 +18,23 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(dataSource);
 });
 
-// UseCase Provider
+// UseCase Provider for signin
 final signInUseCaseProvider = Provider<SignInUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return SignInUseCase(repository);
 });
 
+// UseCase Provider for signout
+final signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return SignOutUseCase(repository);
+});
+
 // Auth State Provider
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final signInUseCase = ref.watch(signInUseCaseProvider);
-  return AuthNotifier(signInUseCase);
+  final signOutUseCase = ref.watch(signOutUseCaseProvider);
+  return AuthNotifier(signInUseCase, signOutUseCase);
 });
 
 // Auth State
@@ -57,8 +65,9 @@ class AuthState {
 // Auth Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final SignInUseCase _signInUseCase;
+  final SignOutUseCase _signOutUseCase;
 
-  AuthNotifier(this._signInUseCase) : super(AuthState());
+  AuthNotifier(this._signInUseCase, this._signOutUseCase) : super(AuthState());
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -73,5 +82,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: false
       );
     }
+  }
+
+  Future<void> signOut() async {
+    await _signOutUseCase.execute();
+    state = AuthState(); // reset state
   }
 }
