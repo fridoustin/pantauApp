@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/core/route/route.dart';
 import 'package:pantau_app/features/splash/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,9 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
+
+  timeago.setLocaleMessages('id', timeago.IdMessages());
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
