@@ -63,150 +63,160 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Image.asset(
-                        'assets/images/login_image.jpg',
-                        height: 200,
-                        width: 200,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Text(
-                        "Login",
-                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-      
-                    TextField(
-                      controller: emailController,
-                      focusNode: _emailFocusNode,
-                      decoration: InputDecoration(
-                        hintText: 'Email',
-                        hintStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      onSubmitted: (_) {
-                        FocusScope.of(context).requestFocus(_passwordFocusNode);
-                      },
-                    ),
-                    const SizedBox(height: 20),
-      
-                    TextField(
-                      controller: passwordController,
-                      focusNode: _passwordFocusNode,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        hintStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        // Password visibility toggle
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey[600],
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                          },
-                        ),
-                      ),
-                      obscureText: _obscureText,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => login(),
-                    ),
-                    const SizedBox(height: 10),
-      
-                    Row(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Transform.scale(
-                          scale: 1.2,
-                          child: Checkbox(
-                            value: _rememberMe,
-                            activeColor: Colors.blue[800],
-                            checkColor: Colors.white,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                _rememberMe = newValue ?? false;
-                              });
-                            },
+                        Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            Center(
+                              child: Image.asset(
+                                'assets/images/login_image.jpg',
+                                height: 200,
+                                width: 200,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Center(
+                              child: Text(
+                                "Login",
+                                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+              
+                            TextField(
+                              controller: emailController,
+                              focusNode: _emailFocusNode,
+                              decoration: InputDecoration(
+                                hintText: 'Email',
+                                hintStyle: TextStyle(color: Colors.grey[600]),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              onSubmitted: (_) {
+                                FocusScope.of(context).requestFocus(_passwordFocusNode);
+                              },
+                            ),
+                            const SizedBox(height: 20),
+              
+                            TextField(
+                              controller: passwordController,
+                              focusNode: _passwordFocusNode,
+                              decoration: InputDecoration(
+                                hintText: 'Password',
+                                hintStyle: TextStyle(color: Colors.grey[600]),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.grey),
+                                ),
+                                // Password visibility toggle
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                                    color: Colors.grey[600],
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                              ),
+                              obscureText: _obscureText,
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) => login(),
+                            ),
+                            const SizedBox(height: 10),
+              
+                            Row(
+                              children: [
+                                Transform.scale(
+                                  scale: 1.2,
+                                  child: Checkbox(
+                                    value: _rememberMe,
+                                    activeColor: Colors.blue[800],
+                                    checkColor: Colors.white,
+                                    onChanged: (bool? newValue) {
+                                      setState(() {
+                                        _rememberMe = newValue ?? false;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                Text(
+                                  'Remember me',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+        
+                        Center(
+                          child: FilledButton(
+                            onPressed: login,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              minimumSize: const Size(400, 50),
+                            ),
+                            child: authState.isLoading
+                              ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Login'),
                           ),
                         ),
-                        Text(
-                          'Remember me',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
+                      ]
                     ),
-                  ],
-                ),
-      
-                Center(
-                  child: FilledButton(
-                    onPressed: login,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      minimumSize: const Size(400, 50),
-                    ),
-                    child: authState.isLoading
-                      ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
-                      )
-                      : const Text('Login'),
                   ),
                 ),
-              ],
-            ),
+              );
+            }
           ),
         ),
       ),
