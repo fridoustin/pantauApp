@@ -16,13 +16,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
-              onTap: () => Navigator.of(context).pushReplacementNamed('/profile'),
-              child: const CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('assets/images/default_avatar.png'),
-              ),
-            ),
+            
+            // Jika ingin ada profil
+
+            // GestureDetector(
+            //   onTap: () => Navigator.of(context).pushReplacementNamed('/profile'),
+            //   child: const CircleAvatar(
+            //     radius: 20,
+            //     backgroundImage: AssetImage('assets/images/default_avatar.png'),
+            //   ),
+            // ),
+            const Spacer(),
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/notification'), 
               child: SvgPicture.asset(
