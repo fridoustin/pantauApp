@@ -32,9 +32,13 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: const Text('Notifications'),
         centerTitle: true,
       ),
+      backgroundColor: AppColors.backgroundColor,
       body: _buildBody(notificationState),
     );
   }
