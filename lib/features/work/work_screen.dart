@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
-import 'package:pantau_app/common/widgets/navBar/navigation_bar.dart';
+import 'package:pantau_app/common/widgets/layout/app_scaffold.dart';
+// ignore: unused_import
 import 'package:pantau_app/core/constant/colors.dart';
 
 class WorkScreen extends ConsumerWidget {
@@ -12,11 +13,10 @@ class WorkScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) { 
     
-    return const Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+    return const AppScaffold(
       appBar: CustomAppBar(),
-      bottomNavigationBar: NavigationBarWidget(currentIndex: 1),
-      body: Center(
+      currentIndex: 1,
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
