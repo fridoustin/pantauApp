@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/core/route/route.dart';
@@ -8,6 +9,10 @@ import 'package:timeago/timeago.dart' as timeago;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent, // warna bottom bar
+    systemNavigationBarIconBrightness: Brightness.light, // warna ikon (light/dark)
+  ));
 
   await dotenv.load(fileName: ".env");
 
