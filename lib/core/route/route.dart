@@ -3,7 +3,7 @@ import 'package:pantau_app/features/auth/presentation/screens/login_screen.dart'
 import 'package:pantau_app/features/calendar/calendar_screen.dart';
 import 'package:pantau_app/features/home/presentation/screens/home_screen.dart';
 import 'package:pantau_app/features/notification/presentation/screens/notification_screen.dart';
-import 'package:pantau_app/features/profile/profile_screen.dart';
+import 'package:pantau_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:pantau_app/features/work/work_screen.dart';
 
 Route<dynamic> routeGenerators(RouteSettings settings) {
