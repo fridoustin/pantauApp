@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantau_app/core/constant/colors.dart';
 
 Future<void> showCustomDialog({
   required BuildContext context,
@@ -28,7 +29,7 @@ Future<void> showCustomDialog({
         actions: [
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.blue[800],
+              backgroundColor: AppColors.primaryColor,
             ),
             onPressed: () {
               Navigator.pop(context);
