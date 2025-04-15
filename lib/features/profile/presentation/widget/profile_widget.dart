@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class ProfileOption extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String label;
   final VoidCallback? onTap;
 
@@ -20,7 +21,8 @@ class ProfileOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Row(
           children: [
-            Icon(icon, size: 24, color: Colors.black),
+            // ignore: deprecated_member_use
+            SvgPicture.asset(icon, width: 24, height: 24, color: const Color(0xFF000000),),
             const SizedBox(width: 16),
             Text(
               label,

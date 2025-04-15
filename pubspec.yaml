@@ -68,6 +68,9 @@ flutter:
     - assets/icons/work.svg
     - assets/icons/notification.svg
     - assets/images/default_avatar.png
+    - assets/icons/lock.svg
+    - assets/icons/settings.svg
+    - assets/icons/edit.svg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
