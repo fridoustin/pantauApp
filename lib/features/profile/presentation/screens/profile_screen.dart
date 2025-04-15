@@ -167,17 +167,17 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 40),
                   // Profile options
                   const ProfileOption(
-                    icon: Icons.person_outline,
+                    icon: 'assets/icons/edit.svg',
                     label: 'Edit Profile',
                   ),
                   const Divider(),
                   const ProfileOption(
-                    icon: Icons.lock_outline,
+                    icon: 'assets/icons/lock.svg',
                     label: 'Change Password',
                   ),
                   const Divider(),
                   const ProfileOption(
-                    icon: Icons.settings_outlined,
+                    icon: 'assets/icons/settings.svg',
                     label: 'Settings',
                   ),
                   const SizedBox(height: 40),
@@ -188,6 +188,7 @@ class ProfileScreen extends ConsumerWidget {
                       onPressed: () async {
                         final authNotifier = ref.read(authStateProvider.notifier);
                         await authNotifier.signOut();
+                        // ignore: use_build_context_synchronously
                         Navigator.pushReplacementNamed(context, '/login');
                       },
                       style: TextButton.styleFrom(
