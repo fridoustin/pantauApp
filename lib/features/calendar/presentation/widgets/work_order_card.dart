@@ -28,7 +28,7 @@ class WorkOrderCard extends ConsumerWidget {
     }
 
     // Function to get category icon
-    IconData getCategoryIcon(String categoryId) {
+    IconData getCategoryIcon(String? categoryId) {
       // This is a placeholder. You should replace with your actual category logic
       switch (categoryId) {
         case '1': // Assuming 1 is HVAC
@@ -67,7 +67,9 @@ class WorkOrderCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    DateFormat('h:mm a').format(workOrder.startTime),
+                    workOrder.startTime != null
+                      ? DateFormat('h:mm a').format(workOrder.startTime!)
+                      : '-',
                     style: TextStyle(
                       color: Colors.blue[800], // //color - time text color
                       fontWeight: FontWeight.bold,
