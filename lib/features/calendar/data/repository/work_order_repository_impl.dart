@@ -9,13 +9,15 @@ class WorkOrderRepositoryImpl implements WorkOrderRepository {
   
   @override
   Future<List<WorkOrder>> getWorkOrdersByDateRange(DateTime start, DateTime end) async {
+    final startStr = start.toIso8601String();
+    final endStr = end.toIso8601String();
+    
     final response = await _supabaseClient
         .from('workorder')
         .select()
-        .gte('start_time', start.toIso8601String())
-        .lte('end_time', end.toIso8601String())
+        .or('start_time.is.null,end_time.is.null,and(start_time.lte.$endStr,end_time.gte.$startStr)')
         .order('start_time');
-        
+
     return response.map<WorkOrder>((json) => WorkOrder.fromJson(json)).toList();
   }
   
