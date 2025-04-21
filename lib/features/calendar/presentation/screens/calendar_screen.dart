@@ -55,11 +55,9 @@ class CalendarScreen extends ConsumerWidget {
                         // Create a mapping of dates with work orders
                         final events = <DateTime, List<WorkOrder>>{};
                         for (final order in workOrders) {
-                          final date = DateTime(order.startTime.year, order.startTime.month, order.startTime.day);
-                          if (events[date] == null) {
-                            events[date] = [];
-                          }
-                          events[date]!.add(order);
+                          final date = order.startTime ?? order.createdAt;
+                          final normalizedDate = DateTime(date.year, date.month, date.day);
+                          events.putIfAbsent(normalizedDate, () => []).add(order);
                         }
                         
                         return TableCalendar(
