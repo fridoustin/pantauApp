@@ -19,11 +19,13 @@ class WorkOrderCard extends ConsumerWidget {
       switch (status.toLowerCase()) {
         case 'selesai':
           return Colors.green; // //color - selesai status color
+        case 'dalam_pengerjaan':
+          return Colors.blue; // //color - dalam pengerjaan status color
         case 'terkendala':
           return Colors.red; // //color - terkendala status color
-        case 'belum':
+        case 'belum_mulai':
         default:
-          return Colors.orange; // //color - belum status color
+          return Colors.grey; // //color - belum mulai status color
       }
     }
 
@@ -144,9 +146,9 @@ class WorkOrderCard extends ConsumerWidget {
                 },
               ),
               ListTile(
-                title: const Text('Belum'),
+                title: const Text('Dalam Pengerjaan'),
                 onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum');
+                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
                   Navigator.pop(context);
                 },
               ),
@@ -154,6 +156,13 @@ class WorkOrderCard extends ConsumerWidget {
                 title: const Text('Terkendala'),
                 onTap: () {
                   ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'terkendala');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Belum Mulai'),
+                onTap: () {
+                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum_mulai');
                   Navigator.pop(context);
                 },
               ),
