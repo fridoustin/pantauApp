@@ -18,14 +18,14 @@ class CalendarViewModel extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       await _repository.updateWorkOrderStatus(id, status);
-      state = const AsyncValue.data(null);
-      
-      // Refresh the work orders list
-      _ref.invalidate(monthWorkOrdersProvider(
-        _ref.read(selectedDateProvider).copyWith(day: 1))
+      final selected = _ref.read(selectedDateProvider);
+      final monthParam = DateTime(selected.year, selected.month);
+      _ref.invalidate(
+        monthWorkOrdersProvider(monthParam),
       );
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
   
