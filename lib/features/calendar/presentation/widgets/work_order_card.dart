@@ -96,7 +96,7 @@ class WorkOrderCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    'Status: ${workOrder.status}',
+                    _formatStatus(workOrder.status),
                     style: TextStyle(
                       color: getStatusColor(workOrder.status),
                       fontWeight: FontWeight.bold,
@@ -127,6 +127,15 @@ class WorkOrderCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _formatStatus(String status) {
+    return status
+        .split('_')
+        .map((word) =>
+            word.substring(0, 1).toUpperCase() +
+            word.substring(1).toLowerCase())
+        .join(' ');
   }
 
   void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
