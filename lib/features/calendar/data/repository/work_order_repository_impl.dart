@@ -20,6 +20,21 @@ class WorkOrderRepositoryImpl implements WorkOrderRepository {
 
     return response.map<WorkOrder>((json) => WorkOrder.fromJson(json)).toList();
   }
+
+  @override
+  Stream<List<WorkOrder>> watchWorkOrdersByDateRange(DateTime start, DateTime end) {
+    final startStr = start.toIso8601String();
+    final endStr = end.toIso8601String();
+
+    return _supabaseClient
+        .from('workorder')
+        .stream(primaryKey: ['id'])
+        .order('start_time')
+        // .or('start_time.is.null,end_time.is.null,and(start_time.lte.$endStr,end_time.gte.$startStr)')
+        .map((events) => events
+            .map<WorkOrder>((json) => WorkOrder.fromJson(json))
+            .toList());
+  }
   
   @override
   Future<void> updateWorkOrderStatus(String id, String status) async {

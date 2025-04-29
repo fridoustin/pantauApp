@@ -14,12 +14,12 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime.now();
 });
 
-final monthWorkOrdersProvider = FutureProvider.autoDispose.family<List<WorkOrder>, DateTime>((ref, month) {
+final monthWorkOrdersProvider = StreamProvider.autoDispose.family<List<WorkOrder>, DateTime>((ref, month) {
   final repository = ref.watch(workOrderRepositoryProvider);
   final firstDay = DateTime(month.year, month.month, 1);
   final lastDay = DateTime(month.year, month.month + 1, 0);
   
-  return repository.getWorkOrdersByDateRange(firstDay, lastDay);
+  return repository.watchWorkOrdersByDateRange(firstDay, lastDay);
 });
 
 final selectedDayWorkOrdersProvider = Provider<List<WorkOrder>>((ref) {

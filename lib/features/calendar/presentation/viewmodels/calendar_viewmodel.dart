@@ -18,12 +18,7 @@ class CalendarViewModel extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       await _repository.updateWorkOrderStatus(id, status);
-      final selected = _ref.read(selectedDateProvider);
-      final monthParam = DateTime(selected.year, selected.month);
-      _ref.invalidate(
-        monthWorkOrdersProvider(monthParam),
-      );
-      state = const AsyncValue.data(null);
+      state = const AsyncValue.data(null); // Hapus invalidate
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
