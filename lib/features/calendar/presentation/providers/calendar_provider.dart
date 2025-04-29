@@ -29,7 +29,7 @@ final selectedDayWorkOrdersProvider = Provider<List<WorkOrder>>((ref) {
   return monthWorkOrdersAsync.when(
     data: (workOrders) {
       return workOrders.where((workOrder) {
-        final dateToCheck = workOrder.startTime ?? workOrder.createdAt;
+        final dateToCheck = workOrder.createdAt;
         return dateToCheck.year == selectedDate.year &&
                dateToCheck.month == selectedDate.month &&
                dateToCheck.day == selectedDate.day;
