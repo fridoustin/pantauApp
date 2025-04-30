@@ -11,44 +11,19 @@ class WorkScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workOrderAsync = ref.watch(workOrdersProvider);
+    final toDoWorkOrder = ref.watch(toDoWorkOrdersProvider);
     return AppScaffold(
       appBar: const CustomAppBar(title: "Work",),
       currentIndex: 1,
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Work Orders"),
-                  const SizedBox(height: 16,),
-                  Expanded(
-                    child: workOrderAsync.when(
-                      data: (workOrders) {
-                        if (workOrders.isEmpty) {
-                          return const Center(child: Text("No"),);
-                        }
-                        return ListView.builder(
-                          itemCount: workOrders.length,
-                          itemBuilder: (context, index) {
-                            final workOrder = workOrders[index];
-                            return WorkOrderCard(workOrder: workOrder);
-                          }
-                        );
-                      }, 
-                      error: (e, _) => const Center(child: Text("Error"),), 
-                      loading: () => const Center(child: CircularProgressIndicator(),),
-                    ),
-                  )
-                ],
-              ),
-            )
-          )
-        ],
-      )
+      child: toDoWorkOrder.isEmpty
+        ? const Center(child: Text('No Work Orders'))
+        : ListView.builder(
+            itemCount: toDoWorkOrder.length,
+            itemBuilder: (context, index) {
+              final workOrder = toDoWorkOrder[index];
+              return WorkOrderCard(workOrder: workOrder);
+            },
+          ),
     );
   }
 }

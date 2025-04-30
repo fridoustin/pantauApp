@@ -14,3 +14,18 @@ final workOrdersProvider = StreamProvider.autoDispose<List<WorkOrder>>((ref) {
   
   return repository.watchWorkOrders();
 });
+
+final toDoWorkOrdersProvider = Provider<List<WorkOrder>>((ref) {
+  final workOrdersAsync = ref.watch(workOrdersProvider);
+  
+  return workOrdersAsync.when(
+    data: (workOrders) {
+      return workOrders.where((workOrder) {
+        final dateToCheck = workOrder.status;
+        return dateToCheck != 'selesai';
+      }).toList();
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});
