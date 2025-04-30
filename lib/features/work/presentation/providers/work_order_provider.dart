@@ -15,17 +15,23 @@ final workOrdersProvider = StreamProvider.autoDispose<List<WorkOrder>>((ref) {
   return repository.watchWorkOrders();
 });
 
-final toDoWorkOrdersProvider = Provider<List<WorkOrder>>((ref) {
-  final workOrdersAsync = ref.watch(workOrdersProvider);
-  
-  return workOrdersAsync.when(
-    data: (workOrders) {
-      return workOrders.where((workOrder) {
-        final dateToCheck = workOrder.status;
-        return dateToCheck != 'selesai';
-      }).toList();
-    },
-    loading: () => [],
-    error: (_, __) => [],
+final toDoWorkOrdersProvider = Provider<AsyncValue<List<WorkOrder>>>((ref) {
+  final all = ref.watch(workOrdersProvider);
+  return all.whenData(
+    (workOrderList) =>
+        workOrderList.where((workOrder) => workOrder.status != 'selesai').toList(),
   );
 });
+
+final historyWorkOrdersProvider = Provider<AsyncValue<List<WorkOrder>>>((ref) {
+  final all = ref.watch(workOrdersProvider);
+  return all.whenData(
+    (workOrderList) =>
+        workOrderList.where((workOrder) => workOrder.status == 'selesai').toList(),
+  );
+});
+
+// Enum for todo-history toggle
+enum WorkMode { todo, history }
+
+final workModeProvider = StateProvider<WorkMode>((ref) => WorkMode.todo);
