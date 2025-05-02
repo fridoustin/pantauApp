@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pantau_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:pantau_app/features/calendar/calendar_screen.dart';
+import 'package:pantau_app/features/create_work_order/presentation/create_work_order_screen.dart';
 import 'package:pantau_app/features/home/presentation/screens/home_screen.dart';
 import 'package:pantau_app/features/notification/presentation/screens/notification_screen.dart';
 import 'package:pantau_app/features/profile/presentation/screens/profile_screen.dart';
@@ -20,6 +21,8 @@ Route<dynamic> routeGenerators(RouteSettings settings) {
       return _buildPageRoute(const ProfileScreen());  
     case NotificationScreen.route :
       return _buildPageRoute(const NotificationScreen());  
+    case CreateWorkOrderScreen.route :
+      return _buildPageRoute(const CreateWorkOrderScreen());  
     default:
       throw ('Route not found');
   }  

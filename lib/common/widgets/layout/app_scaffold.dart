@@ -31,6 +31,9 @@ class AppScaffold extends StatelessWidget {
         appBar: appBar,
         body: child,
         bottomNavigationBar: NavigationBarWidget(currentIndex: currentIndex),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
+        ),
         backgroundColor: AppColors.backgroundColor,
       ),
     );
