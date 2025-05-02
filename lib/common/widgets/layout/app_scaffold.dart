@@ -6,12 +6,14 @@ class AppScaffold extends StatelessWidget {
   final Widget child;
   final int currentIndex;
   final PreferredSizeWidget? appBar;
+  final Widget? floatingActionButton;
 
   const AppScaffold({
     super.key,
     required this.child,
     required this.currentIndex,
     this.appBar,
+    this.floatingActionButton,
   });
 
   @override
@@ -31,9 +33,10 @@ class AppScaffold extends StatelessWidget {
         appBar: appBar,
         body: child,
         bottomNavigationBar: NavigationBarWidget(currentIndex: currentIndex),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
-        ),
+        floatingActionButton: floatingActionButton,
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
+        // ),
         backgroundColor: AppColors.backgroundColor,
       ),
     );

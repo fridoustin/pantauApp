@@ -20,6 +20,11 @@ class WorkScreen extends ConsumerWidget {
     return AppScaffold(
       appBar: const CustomAppBar(title: "Work",),
       currentIndex: 1,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
+        backgroundColor: AppColors.primaryColor,
+        child: const Icon(Icons.add),
+      ),
       child: Column(
         children: [
           // Dua tombol To Do & History
