@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title; // ✅ tambahkan judul bisa diganti-ganti
+  final String title;
+  final bool showBackButton;
 
-  const CustomAppBar({super.key, this.title = ''});
+  const CustomAppBar({
+    super.key,
+    this.title = '',
+    this.showBackButton = false, // 🆕 Default tidak ada tombol back
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(60);
@@ -18,17 +23,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Title
-            if (title.isNotEmpty)
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            // Back Button (optional)
+            if (showBackButton)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
 
-            // Notification Icon
+            // Title (centered)
+            if (title.isNotEmpty)
+              Center(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+            // Notification Icon (right)
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
