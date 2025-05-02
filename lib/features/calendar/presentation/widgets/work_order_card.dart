@@ -19,16 +19,18 @@ class WorkOrderCard extends ConsumerWidget {
       switch (status.toLowerCase()) {
         case 'selesai':
           return Colors.green; // //color - selesai status color
+        case 'dalam_pengerjaan':
+          return Colors.blue; // //color - dalam pengerjaan status color
         case 'terkendala':
           return Colors.red; // //color - terkendala status color
-        case 'belum':
+        case 'belum_mulai':
         default:
-          return Colors.orange; // //color - belum status color
+          return Colors.grey; // //color - belum mulai status color
       }
     }
 
     // Function to get category icon
-    IconData getCategoryIcon(String categoryId) {
+    IconData getCategoryIcon(String? categoryId) {
       // This is a placeholder. You should replace with your actual category logic
       switch (categoryId) {
         case '1': // Assuming 1 is HVAC
@@ -67,7 +69,9 @@ class WorkOrderCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    DateFormat('h:mm a').format(workOrder.startTime),
+                    workOrder.startTime != null
+                      ? DateFormat('h:mm a').format(workOrder.startTime!)
+                      : '-',
                     style: TextStyle(
                       color: Colors.blue[800], // //color - time text color
                       fontWeight: FontWeight.bold,
@@ -92,7 +96,7 @@ class WorkOrderCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    'Status: ${workOrder.status}',
+                    _formatStatus(workOrder.status),
                     style: TextStyle(
                       color: getStatusColor(workOrder.status),
                       fontWeight: FontWeight.bold,
@@ -125,6 +129,15 @@ class WorkOrderCard extends ConsumerWidget {
     );
   }
 
+  String _formatStatus(String status) {
+    return status
+        .split('_')
+        .map((word) =>
+            word.substring(0, 1).toUpperCase() +
+            word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
   void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     showDialog(
       context: context,
@@ -142,9 +155,9 @@ class WorkOrderCard extends ConsumerWidget {
                 },
               ),
               ListTile(
-                title: const Text('Belum'),
+                title: const Text('Dalam Pengerjaan'),
                 onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum');
+                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
                   Navigator.pop(context);
                 },
               ),
@@ -152,6 +165,13 @@ class WorkOrderCard extends ConsumerWidget {
                 title: const Text('Terkendala'),
                 onTap: () {
                   ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'terkendala');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Belum Mulai'),
+                onTap: () {
+                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum_mulai');
                   Navigator.pop(context);
                 },
               ),
