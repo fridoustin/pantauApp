@@ -5,6 +5,7 @@ import 'package:pantau_app/common/widgets/layout/app_scaffold.dart';
 import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:pantau_app/features/profile/presentation/providers/technician_profile_provider.dart';
+import 'package:pantau_app/features/profile/presentation/providers/work_order_counts_provider.dart';
 import 'package:pantau_app/features/profile/presentation/widget/profile_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +25,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // Refresh data profil saat layar dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(technicianProfileProvider);
+      ref.invalidate(workOrderCountsProvider);
     });
   }
 
@@ -32,6 +34,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     final email = user?.email ?? "Unknown";
     final profileData = ref.watch(technicianProfileProvider);
+    final workOrderCountsData = ref.watch(workOrderCountsProvider);
 
     return AppScaffold(
       appBar: const CustomAppBar(title: 'Profile'),
@@ -45,6 +48,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onRefresh: () async {
                   // Refresh data saat user menarik layar ke bawah
                   ref.invalidate(technicianProfileProvider);
+                  ref.invalidate(workOrderCountsProvider);
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -143,29 +147,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      const Text(
-                                        '12',
-                                        style: TextStyle(
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 4),
-                                        child: Text(
-                                          'wo',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey[600],
+                                  workOrderCountsData.when(
+                                    data: (counts) => Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${counts.completed}',
+                                          style: const TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                        const SizedBox(width: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 4),
+                                          child: Text(
+                                            'wo',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    loading: () => Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        const Text(
+                                          '',
+                                          style: TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 4),
+                                          child: Text(
+                                            '',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    error: (error, stack) => const Text(
+                                      'Error',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 16,
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -189,29 +226,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      const Text(
-                                        '12',
-                                        style: TextStyle(
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 4),
-                                        child: Text(
-                                          'wo',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey[600],
+                                  workOrderCountsData.when(
+                                    data: (counts) => Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${counts.notCompleted}',
+                                          style: const TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                        const SizedBox(width: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 4),
+                                          child: Text(
+                                            'wo',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    loading: () => Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        const Text(
+                                          '',
+                                          style: TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 4),
+                                          child: Text(
+                                            '',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    error: (error, stack) => const Text(
+                                      'Error',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 16,
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
