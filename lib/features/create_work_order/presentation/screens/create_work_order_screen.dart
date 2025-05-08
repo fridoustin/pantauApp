@@ -59,7 +59,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
         value: _selectedCategoryId,
         onChanged: (val) => setState(() => _selectedCategoryId = val),
       ),
-      loading: () => const SizedBox(),
+      loading: () => const SizedBox.shrink(),
       error: (e, _) => Text('Error loading categories: $e'),
     );
   }
