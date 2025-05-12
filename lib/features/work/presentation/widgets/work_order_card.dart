@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 
@@ -15,7 +16,7 @@ class WorkOrderCard extends ConsumerWidget {
     Color getStatusColor(String status) {
       switch (status.toLowerCase()) {
         case 'selesai':
-          return Colors.green; // //color - selesai status color
+          return AppColors.successColor; // //color - selesai status color
         case 'dalam_pengerjaan':
           return Colors.blue; // //color - dalam pengerjaan status color
         case 'terkendala':
@@ -38,88 +39,98 @@ class WorkOrderCard extends ConsumerWidget {
       }
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(getCategoryIcon(workOrder.categoryId)), // Category icon
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    workOrder.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context, 
+          '/workorder/detail',
+          arguments: workOrder.id,
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        color: AppColors.cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(getCategoryIcon(workOrder.categoryId)), // Category icon
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      workOrder.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[100],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    workOrder.startTime != null
-                      ? DateFormat('h:mm a').format(workOrder.startTime!)
-                      : '-',
-                    style: TextStyle(
-                      color: Colors.blue[800],
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      workOrder.startTime != null
+                        ? DateFormat('h:mm a').format(workOrder.startTime!)
+                        : '-',
+                      style: TextStyle(
+                        color: Colors.blue[800],
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              workOrder.description,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: getStatusColor(workOrder.status).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    _formatStatus(workOrder.status),
-                    style: TextStyle(
-                      color: getStatusColor(workOrder.status),
-                      fontWeight: FontWeight.bold,
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                workOrder.description,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: getStatusColor(workOrder.status).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      _formatStatus(workOrder.status),
+                      style: TextStyle(
+                        color: getStatusColor(workOrder.status),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    // Update status button
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        _showStatusUpdateDialog(context, ref, workOrder);
-                      },
-                    ),
-                    // Calendar Synch
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () {
-
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                  Row(
+                    children: [
+                      // Update status button
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _showStatusUpdateDialog(context, ref, workOrder);
+                        },
+                      ),
+                      // Calendar Synch
+                      // IconButton(
+                      //   icon: const Icon(Icons.calendar_today),
+                      //   onPressed: () {
+      
+                      //   },
+                      // ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -140,6 +151,7 @@ class WorkOrderCard extends ConsumerWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Update Status'),
+          backgroundColor: AppColors.cardColor,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
