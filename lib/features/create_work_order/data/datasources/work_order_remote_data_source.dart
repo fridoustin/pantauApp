@@ -13,7 +13,7 @@ class WorkOrderRemoteDataSource {
       .select()
       .single();
 
-    if (result == null) {
+    if (result.isEmpty) {
       throw Exception('Failed');
     }
   }

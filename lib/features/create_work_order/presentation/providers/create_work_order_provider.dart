@@ -49,16 +49,12 @@ class CreateWorkOrderNotifier extends StateNotifier<AsyncValue<void>> {
       final now = DateTime.now();
       final user = Supabase.instance.client.auth.currentUser;
       final order = WorkOrder(
-        id: const Uuid().v4(),
         title: title,
         description: description,
-        startTime: startTime,
         endTime: endTime,
         createdAt: now,
-        updatedAt: null,
         status: status,
         technicianId: user!.id,
-        adminId: null,
         categoryId: categoryId,
       );
       await _addWorkOrder(order);

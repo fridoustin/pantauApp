@@ -14,16 +14,12 @@ class WorkOrderRepositoryImpl implements WorkOrderRepository {
   @override
   Future<void> addWorkOrder(WorkOrder order) async {
     final model = WorkOrderModel(
-      id: order.id,
       title: order.title,
       description: order.description,
-      startTime: order.startTime,
       endTime: order.endTime,
       createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
       status: order.status,
       technicianId: order.technicianId,
-      adminId: order.adminId,
       categoryId: order.categoryId,
     );
     await remote.addWorkOrder(model);
