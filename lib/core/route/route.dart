@@ -6,7 +6,10 @@ import 'package:pantau_app/features/home/presentation/screens/home_screen.dart';
 import 'package:pantau_app/features/notification/presentation/screens/notification_screen.dart';
 import 'package:pantau_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:pantau_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/screens/work_screen.dart';
+import 'package:pantau_app/features/work_order_detail/presentation/screens/work_order_detail_screen.dart';
+import 'package:pantau_app/features/work_order_edit/presentation/screens/work_order_edit_screen.dart';
 
 Route<dynamic> routeGenerators(RouteSettings settings) {
   switch (settings.name) {
@@ -26,6 +29,13 @@ Route<dynamic> routeGenerators(RouteSettings settings) {
       return _buildPageRoute(const EditProfileScreen());
     case CreateWorkOrderScreen.route :
       return _buildPageRoute(const CreateWorkOrderScreen());  
+    case WorkOrderDetailScreen.route :
+      final workOrderId = settings.arguments as String;
+      return _buildPageRoute(WorkOrderDetailScreen(workOrderId: workOrderId));
+    case WorkOrderEditScreen.route :
+      // Extract the work order from arguments
+      final workOrder = settings.arguments as WorkOrder;
+      return _buildPageRoute(WorkOrderEditScreen(workOrder: workOrder));
     default:
       throw ('Route not found');
   }  
