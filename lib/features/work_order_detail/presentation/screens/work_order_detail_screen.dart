@@ -415,109 +415,123 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     );
   }
   
-  Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
-    return Card(
-      elevation: 0,
-      color: AppColors.cardColor,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.info_outline, color: AppColors.primaryColor),
-                const SizedBox(width: 8),
-                Text(
-                  'Additional Information',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-            
-            // Info grid
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2.5,
-              children: [
-                _buildInfoItem(
-                  context, 
-                  'Category',
-                  _getCategoryName(workOrder.categoryId),
-                  Icons.category,
-                ),
-                _buildInfoItem(
-                  context, 
-                  'Created',
-                  DateFormat('dd MMM yyyy').format(workOrder.createdAt),
-                  Icons.event_available,
-                ),
-                _buildInfoItem(
-                  context, 
-                  'Last Updated',
-                  workOrder.updatedAt != null 
-                    ? DateFormat('dd MMM yyyy').format(workOrder.updatedAt!) 
-                    : 'Never updated',
-                  Icons.update,
-                ),
-                if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
-                  _buildInfoItem(
-                    context, 
-                    'Admin ID',
-                    _formatAdminId(workOrder.adminId!),
-                    Icons.admin_panel_settings,
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildInfoItem(BuildContext context, String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.cardColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
+Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
+  return Card(
+    elevation: 0,
+    color: AppColors.cardColor,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: Colors.grey[600]),
-              const SizedBox(width: 4),
+              const Icon(Icons.info_outline, color: AppColors.primaryColor),
+              const SizedBox(width: 8),
               Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                'Additional Information',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            value.isEmpty ? '-' : value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          const Divider(height: 24),
+          
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem(
+                      context, 
+                      'Category',
+                      _getCategoryName(workOrder.categoryId),
+                      Icons.category,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildInfoItem(
+                      context, 
+                      'Created',
+                      DateFormat('dd MMM yyyy').format(workOrder.createdAt),
+                      Icons.event_available,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem(
+                      context, 
+                      'Last Updated',
+                      workOrder.updatedAt != null 
+                        ? DateFormat('dd MMM yyyy').format(workOrder.updatedAt!) 
+                        : 'Never updated',
+                      Icons.update,
+                    ),
+                  ),
+                  if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
+                    const SizedBox(width: 16),
+                  if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
+                    Expanded(
+                      child: _buildInfoItem(
+                        context, 
+                        'Admin ID',
+                        _formatAdminId(workOrder.adminId!),
+                        Icons.admin_panel_settings,
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+// Tetap sama seperti sebelumnya
+Widget _buildInfoItem(BuildContext context, String label, String value, IconData icon) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: AppColors.cardColor,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: Colors.grey[600]),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value.isEmpty ? '-' : value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    ),
+  );
+}
   
   Widget _buildStatusSection(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     final statuses = ['belum_mulai', 'dalam_pengerjaan', 'terkendala', 'selesai'];
@@ -573,7 +587,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
                         height: 105,
                         decoration: BoxDecoration(
                           color: isSelected 
-                              ? statusColors[index].withValues(alpha: 0.2) 
+                              ? statusColors[index].withOpacity(0.2) 
                               : Colors.transparent,
                           border: Border(
                             bottom: BorderSide(
