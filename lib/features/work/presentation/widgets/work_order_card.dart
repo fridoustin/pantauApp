@@ -118,13 +118,6 @@ class WorkOrderCard extends ConsumerWidget {
                           _showStatusUpdateDialog(context, ref, workOrder);
                         },
                       ),
-                      // Calendar Synch
-                      // IconButton(
-                      //   icon: const Icon(Icons.calendar_today),
-                      //   onPressed: () {
-      
-                      //   },
-                      // ),
                     ],
                   ),
                 ],
@@ -166,6 +159,9 @@ class WorkOrderCard extends ConsumerWidget {
                 title: const Text('Dalam Pengerjaan'),
                 onTap: () {
                   ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
+                  if (workOrder.startTime == null) {
+                    ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
+                  }
                   Navigator.pop(context);
                 },
               ),

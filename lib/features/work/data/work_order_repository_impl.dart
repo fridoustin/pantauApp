@@ -27,6 +27,14 @@ class WorkOrderRepositoryImpl implements WorkOrderRepository {
   }
 
   @override
+  Future<void> updateStartTime(String id) async {
+    await _supabaseClient
+        .from('workorder')
+        .update({'start_time': DateTime.now().toIso8601String()})
+        .eq('id', id);
+  }
+
+  @override
   Future<void> updateWorkOrder(String id, Map<String, dynamic> data) async {
     data['updated_at'] = DateTime.now().toIso8601String();
     

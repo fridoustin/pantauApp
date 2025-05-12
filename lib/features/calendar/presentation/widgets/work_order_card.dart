@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/calendar/domain/models/work_order.dart';
-import 'package:pantau_app/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:pantau_app/features/calendar/presentation/viewmodels/calendar_viewmodel.dart';
+import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 
 class WorkOrderCard extends ConsumerWidget {
   final WorkOrder workOrder;
@@ -170,6 +170,9 @@ class WorkOrderCard extends ConsumerWidget {
                 title: const Text('Dalam Pengerjaan'),
                 onTap: () {
                   ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
+                  if (workOrder.startTime == null) {
+                    ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
+                  }
                   Navigator.pop(context);
                 },
               ),
@@ -193,50 +196,4 @@ class WorkOrderCard extends ConsumerWidget {
       },
     );
   }
-
-  // void _showCalendarSyncDialog(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
-  //   final calendarsAsync = ref.watch(deviceCalendarsProvider);
-    
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text('Sync with Calendar'),
-  //         content: SizedBox(
-  //           width: double.maxFinite,
-  //           child: calendarsAsync.when(
-  //             data: (calendars) {
-  //               return ListView.builder(
-  //                 shrinkWrap: true,
-  //                 itemCount: calendars.length,
-  //                 itemBuilder: (context, index) {
-  //                   final calendar = calendars[index];
-  //                   return ListTile(
-  //                     title: Text(calendar.name ?? 'Unnamed Calendar'),
-  //                     onTap: () {
-  //                       ref.read(calendarViewModelProvider.notifier)
-  //                         .syncWithDeviceCalendar(workOrder, calendar.id ?? '');
-  //                       Navigator.pop(context);
-  //                       ScaffoldMessenger.of(context).showSnackBar(
-  //                         const SnackBar(content: Text('Work order synced with calendar')),
-  //                       );
-  //                     },
-  //                   );
-  //                 },
-  //               );
-  //             },
-  //             loading: () => const Center(child: CircularProgressIndicator()),
-  //             error: (_, __) => const Text('Failed to load calendars'),
-  //           ),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context),
-  //             child: const Text('Cancel'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 }
