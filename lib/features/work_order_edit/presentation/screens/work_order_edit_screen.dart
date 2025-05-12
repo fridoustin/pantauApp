@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pantau_app/common/widgets/custom_app_bar.dart';
-import 'package:pantau_app/common/widgets/layout/app_scaffold.dart';
 import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work_order_edit/presentation/viewmodels/work_order_edit_viewmodel.dart';
@@ -62,23 +60,20 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        appBar: const CustomAppBar(
-          title: "Edit Work Order",
-          showBackButton: true,
-          // actions: [
-          //   if (_hasUnsavedChanges)
-          //     Container(
-          //       margin: const EdgeInsets.only(right: 16),
-          //       child: Chip(
-          //         label: const Text('Unsaved'),
-          //         labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
-          //         backgroundColor: AppColors.warningColor,
-          //         padding: EdgeInsets.zero,
-          //         visualDensity: VisualDensity.compact,
-          //       ),
-          //     ),
-          // ],
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundColor,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          title: const Text(
+            "Work Order Edit",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold
+            )
+          ),
+          centerTitle: true,
         ),
+        backgroundColor: AppColors.backgroundColor,
         body: Form(
           key: _formKey,
           child: _buildBody(),
@@ -158,19 +153,19 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
     final Map<String, Map<String, dynamic>> statusConfig = {
       'belum_mulai': {
         'color': Colors.grey,
-        'label': 'Not Started',
+        'label': 'Belum Mulai',
       },
       'dalam_pengerjaan': {
-        'color': AppColors.primaryColor,
-        'label': 'In Progress',
+        'color': Colors.blue,
+        'label': 'Dalam Pengerjaan',
       },
       'terkendala': {
-        'color': AppColors.warningColor,
-        'label': 'Blocked',
+        'color': Colors.red,
+        'label': 'Terkendala',
       },
       'selesai': {
         'color': AppColors.successColor,
-        'label': 'Completed',
+        'label': 'Selesai',
       },
     };
     
@@ -197,6 +192,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
   Widget _buildBasicInfoSection() {
     return Card(
       elevation: 0,
+      color: AppColors.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade200),
@@ -217,7 +213,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
               decoration: InputDecoration(
                 hintText: 'Enter work order title',
                 filled: true,
-                fillColor: AppColors.backgroundColor,
+                fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -244,7 +240,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
               decoration: InputDecoration(
                 hintText: 'Enter work order description',
                 filled: true,
-                fillColor: AppColors.backgroundColor,
+                fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -274,10 +270,11 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
   Widget _buildCategoryDropdown() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.backgroundColor,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButtonFormField<String>(
+        dropdownColor: AppColors.cardColor,
         value: _selectedCategoryId,
         decoration: InputDecoration(
           border: OutlineInputBorder(
@@ -292,7 +289,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
         items: const [
           DropdownMenuItem<String>(
             value: null,
-            child: Text('General'),
+            child: Text('-'),
           ),
           DropdownMenuItem<String>(
             value: '81e188a8-e7e4-401b-8a16-300d92e53abe',
@@ -335,6 +332,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
   Widget _buildDateTimeSection() {
     return Card(
       elevation: 0,
+      color: AppColors.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade200),
@@ -347,16 +345,6 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
             _buildSectionHeader('Schedule', Icons.calendar_today),
             const SizedBox(height: 16),
             
-            // Start Time (read-only)
-            _buildReadOnlyTimeField(
-              'Start Time',
-              widget.workOrder.startTime != null 
-                ? DateFormat('dd MMM yyyy, HH:mm').format(widget.workOrder.startTime!)
-                : 'Not scheduled',
-              Icons.play_circle_outline,
-            ),
-            const SizedBox(height: 20),
-            
             // Due Date (editable)
             _buildFieldLabel('Due Date'),
             const SizedBox(height: 8),
@@ -365,7 +353,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundColor,
+                  color: AppColors.cardColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -401,34 +389,6 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildReadOnlyTimeField(String label, String value, IconData icon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel(label),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.grey[600]),
-              const SizedBox(width: 12),
-              Text(
-                value,
-                style: TextStyle(color: Colors.grey[800]),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -614,7 +574,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
               ),
             );
             Navigator.pop(context);
-            Navigator.pop(context); // Pop dua kali untuk kembali ke yang ada navbar
+            // Navigator.pop(context); // Pop dua kali untuk kembali ke yang ada navbar
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -652,6 +612,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.cardColor,
         title: const Text('Discard changes?'),
         content: const Text('You have unsaved changes. Are you sure you want to discard them?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
