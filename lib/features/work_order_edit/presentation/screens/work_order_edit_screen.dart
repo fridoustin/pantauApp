@@ -69,7 +69,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold
-            )
+            ) 
           ),
           centerTitle: true,
         ),
@@ -104,10 +104,10 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
   Widget _buildInfoCard() {
     return Card(
       elevation: 0,
-      color: AppColors.primaryColor.withOpacity(0.1),
+      color: AppColors.primaryColor.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+        side: BorderSide(color: AppColors.primaryColor.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -463,7 +463,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              disabledBackgroundColor: AppColors.primaryColor.withOpacity(0.3),
+              disabledBackgroundColor: AppColors.primaryColor.withValues(alpha: 0.3),
             ),
           ),
         ),

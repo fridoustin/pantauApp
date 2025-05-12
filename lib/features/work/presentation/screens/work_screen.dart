@@ -86,8 +86,8 @@ class WorkScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
         backgroundColor: AppColors.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       child: Column(
         children: [
@@ -100,7 +100,7 @@ class WorkScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: const Offset(0, 1),
@@ -290,7 +290,7 @@ class _SearchBar extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 1),
@@ -341,7 +341,7 @@ class _FilterSortBar extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: hasActiveFilters ? AppColors.primaryColor.withOpacity(0.1) : Colors.white,
+                color: hasActiveFilters ? AppColors.primaryColor.withValues(alpha: 0.1) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: hasActiveFilters ? AppColors.primaryColor : Colors.grey[300]!,
@@ -434,24 +434,6 @@ class _FilterSortBar extends ConsumerWidget {
       'b3955121-15ec-4b75-acc7-20be78921f66': 'Lt. 3',
       '45cc0e22-76b3-42a5-b61f-6ffde101624b': 'Rooftop',
     };
-    String _getCategoryName(String? categoryId) {
-    switch (categoryId) {
-      case '81e188a8-e7e4-401b-8a16-300d92e53abe':
-        return 'Basement';      
-      case '3b39fcc9-710c-4dd4-a26a-f5ce854cb038':
-        return 'GF';
-      case '1f0973f6-f92c-4b65-9cd8-8d82e897d1ae':
-        return 'Lt. 1';
-      case '156d317c-d94a-4e3d-9cf5-da90681b3a60':
-        return 'Lt. 2';
-      case 'b3955121-15ec-4b75-acc7-20be78921f66':
-        return 'Lt. 3';
-      case '45cc0e22-76b3-42a5-b61f-6ffde101624b':
-        return 'Rooftop';
-      default:
-        return categoryId != null ? 'Category #$categoryId' : '';
-    }
-  }
     
     final statuses = {
       'selesai': 'Selesai',

@@ -97,8 +97,8 @@ class WorkOrderDetailScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.05),
-        border: Border(bottom: BorderSide(color: AppColors.primaryColor.withOpacity(0.2), width: 1)),
+        color: AppColors.primaryColor.withValues(alpha: 0.05),
+        border: Border(bottom: BorderSide(color: AppColors.primaryColor.withValues(alpha: 0.2), width: 1)),
         borderRadius: BorderRadius.circular(12)
       ),
       child: Column(
@@ -387,9 +387,9 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
-        color: indicatorColor.withOpacity(0.1),
+        color: indicatorColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: indicatorColor.withOpacity(0.3)),
+        border: Border.all(color: indicatorColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -573,7 +573,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
                         height: 105,
                         decoration: BoxDecoration(
                           color: isSelected 
-                              ? statusColors[index].withOpacity(0.2) 
+                              ? statusColors[index].withValues(alpha: 0.2) 
                               : Colors.transparent,
                           border: Border(
                             bottom: BorderSide(
