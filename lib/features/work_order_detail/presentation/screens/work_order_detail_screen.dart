@@ -69,41 +69,24 @@ class WorkOrderDetailScreen extends ConsumerWidget {
   Widget _buildDetailContent(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with title and status indicator
           _buildHeader(context, workOrder),
+          const SizedBox(height: 16),
+
+          _buildAllDetailCard(context, workOrder),
+          const SizedBox(height: 24),
           
-          // Main content with details
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Description card
-                _buildDescriptionCard(context, workOrder),
-                const SizedBox(height: 16),
-                
-                // Schedule card
-                _buildScheduleCard(context, workOrder),
-                const SizedBox(height: 16),
-                
-                // Information card
-                _buildInformationCard(context, workOrder),
-                const SizedBox(height: 24),
-                
-                // Status options
-                _buildStatusSection(context, ref, workOrder),
-                const SizedBox(height: 32),
-                
-                // Action buttons
-                _buildActionButtons(context, workOrder),
-                
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
+          // Status options
+          _buildStatusSection(context, ref, workOrder),
+          const SizedBox(height: 32),
+          
+          // Action buttons
+          _buildActionButtons(context, workOrder),
+          
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -116,6 +99,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.primaryColor.withOpacity(0.05),
         border: Border(bottom: BorderSide(color: AppColors.primaryColor.withOpacity(0.2), width: 1)),
+        borderRadius: BorderRadius.circular(12)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,14 +195,39 @@ class WorkOrderDetailScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildAllDetailCard(BuildContext context, WorkOrder workOrder) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade200,
+        )
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Description card
+          _buildDescriptionCard(context, workOrder),
+          const SizedBox(height: 16),
+          
+          // Schedule card
+          _buildScheduleCard(context, workOrder),
+          const SizedBox(height: 16),
+          
+          // Information card
+          _buildInformationCard(context, workOrder),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
   
   Widget _buildDescriptionCard(BuildContext context, WorkOrder workOrder) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+      color: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -250,10 +259,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
   Widget _buildScheduleCard(BuildContext context, WorkOrder workOrder) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+      color: AppColors.cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -412,10 +418,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
   Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+      color: AppColors.cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -483,7 +486,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.backgroundColor,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -504,7 +507,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            value,
+            value.isEmpty ? '-' : value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
             ),
@@ -556,17 +559,18 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Material(
-              color: Colors.white,
+              color: AppColors.cardColor,
               child: Row(
                 children: List.generate(statuses.length, (index) {
                   final isSelected = workOrder.status == statuses[index];
                   return Expanded(
                     child: InkWell(
                       onTap: () {
-                        _updateStatus(ref, workOrder.id, statuses[index]);
+                        _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        height: 105,
                         decoration: BoxDecoration(
                           color: isSelected 
                               ? statusColors[index].withOpacity(0.2) 
@@ -582,6 +586,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Icon(
                               statusIcons[index],
@@ -653,8 +658,11 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _updateStatus(WidgetRef ref, String workOrderId, String newStatus) {
+  void _updateStatus(WidgetRef ref, String workOrderId, DateTime? workOrderStartTime, String newStatus) {
     ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrderId, newStatus);
+    if (workOrderStartTime == null && newStatus == 'dalam_pengerjaan') {
+      ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrderId);
+    }
   }
 
   String _getCategoryName(String? categoryId) {
