@@ -12,7 +12,7 @@ Future<void> showCustomDialog({
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.cardColor,
         icon: Icon(
           iconData,
           color: Colors.red,
