@@ -122,13 +122,6 @@ class WorkOrderCard extends ConsumerWidget {
                           _showStatusUpdateDialog(context, ref, workOrder);
                         },
                       ),
-                      // Sync with device calendar button
-                      // IconButton(
-                      //   icon: const Icon(Icons.calendar_today), // //icon - calendar icon
-                      //   onPressed: () {
-                      //     _showCalendarSyncDialog(context, ref, workOrder);
-                      //   },
-                      // ),
                     ],
                   ),
                 ],
@@ -149,6 +142,41 @@ class WorkOrderCard extends ConsumerWidget {
         .join(' ');
   }
 
+  void _showConfirmDialog(BuildContext context, WidgetRef ref, String workOrderStatus) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardColor,
+        title: const Text('Confirm Status Change'),
+        content: const Text(
+          "Are you sure you want to revert this work order from “Selesai”? If you do, you’ll need to create a new report when you mark it as “Selesai” again.",
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, workOrderStatus);
+              if (workOrder.startTime == null && workOrderStatus == 'dalam_pengerjaan') {
+                ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
+              }
+              Navigator.of(ctx).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Yes, Revert'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     showDialog(
       context: context,
@@ -162,32 +190,53 @@ class WorkOrderCard extends ConsumerWidget {
               ListTile(
                 title: const Text('Selesai'),
                 onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'selesai');
                   Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Dalam Pengerjaan'),
-                onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
-                  if (workOrder.startTime == null) {
-                    ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
+                  if (workOrder.status != 'selesai') {
+                    Navigator.pushNamed(
+                      context, 
+                      '/workorder/report',
+                      arguments: workOrder.id,
+                    );
                   }
-                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: const Text('Terkendala'),
                 onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'terkendala');
-                  Navigator.pop(context);
+                  if (workOrder.status == 'selesai') {
+                    Navigator.pop(context);
+                    _showConfirmDialog(context, ref, 'terkendala');
+                  } else {
+                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'terkendala');
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              ListTile(
+                title: const Text('Dalam Pengerjaan'),
+                onTap: () {
+                  if (workOrder.status == 'selesai') {
+                    Navigator.pop(context);
+                    _showConfirmDialog(context, ref, 'dalam_pengerjaan');
+                  } else {
+                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
+                    if (workOrder.startTime == null) {
+                      ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
+                    }
+                    Navigator.pop(context);
+                  }
                 },
               ),
               ListTile(
                 title: const Text('Belum Mulai'),
                 onTap: () {
-                  ref.read(calendarViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum_mulai');
-                  Navigator.pop(context);
+                  if (workOrder.status == 'selesai') {
+                    Navigator.pop(context);
+                    _showConfirmDialog(context, ref, 'belum_mulai');
+                  } else {
+                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum_mulai');
+                    Navigator.pop(context);
+                  }
                 },
               ),
             ],
