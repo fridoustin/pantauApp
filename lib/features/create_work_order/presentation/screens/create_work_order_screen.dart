@@ -107,7 +107,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
             TextFormField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'Enter work order title',
+                hintText: 'Enter work order title...',
                 filled: true,
                 fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(
@@ -134,7 +134,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
             TextFormField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                hintText: 'Enter work order description',
+                hintText: 'Enter work order description...',
                 filled: true,
                 fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(
