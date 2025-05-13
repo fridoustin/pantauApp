@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/report/presentation/widget/report_section_widget.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 import 'package:pantau_app/features/work_order_detail/presentation/providers/work_order_detail_provider.dart';
@@ -81,12 +82,13 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           
           // Status options
           _buildStatusSection(context, ref, workOrder),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+
+          // Report section
+          ReportSection(workOrderId: workOrderId),
           
           // Action buttons
-          _buildActionButtons(context, workOrder),
-          
-          const SizedBox(height: 40),
+          _buildActionButtons(context, workOrder),          
         ],
       ),
     );
@@ -580,14 +582,53 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                   return Expanded(
                     child: InkWell(
                       onTap: () {
-                        _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai') {
+                          Navigator.pushNamed(
+                            context, 
+                            '/workorder/report',
+                            arguments: workOrder.id,
+                          );
+                        } else if (statuses[index] != 'selesai' && workOrder.status == 'selesai') {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: AppColors.cardColor,
+                              title: const Text('Confirm Status Change'),
+                              content: const Text(
+                                "Are you sure you want to revert this work order from “Selesai”? If you do, you’ll need to create a new report when you mark it as “Selesai” again.",
+                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(), 
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                                    Navigator.of(ctx).pop();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.errorColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text('Yes, Revert'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        else {
+                          _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         height: 105,
                         decoration: BoxDecoration(
                           color: isSelected 
-                              ? statusColors[index].withOpacity(0.2) 
+                              ? statusColors[index].withValues(alpha: 0.2) 
                               : Colors.transparent,
                           border: Border(
                             bottom: BorderSide(
