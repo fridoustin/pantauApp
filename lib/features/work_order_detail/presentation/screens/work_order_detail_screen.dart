@@ -123,10 +123,10 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.category_outlined, size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                _getCategoryName(workOrder.categoryId),
+                _getCategoryName(workOrder.categoryId).isEmpty ? '-' : _getCategoryName(workOrder.categoryId),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -313,7 +313,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
             ),
             
             // Show deadline indicator if due date exists
-            if (workOrder.endTime != null)
+            if (workOrder.endTime != null && (workOrder.status != 'selesai' || (workOrder.status == 'selesai' && workOrder.updatedAt != null && workOrder.endTime!.difference(workOrder.updatedAt!).isNegative)))
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: _buildDeadlineIndicator(context, workOrder.endTime!),
@@ -366,22 +366,32 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     final now = DateTime.now();
     final difference = dueDate.difference(now);
     final daysLeft = difference.inDays;
-    
+
+    // untuk membandingkan hanya bagian date (year, month, day)
+    final todayDate = DateTime(now.year, now.month, now.day);
+    final tomorrowDate = todayDate.add(const Duration(days: 1));
+    final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+
     Color indicatorColor;
     String statusText;
-    
+
     if (difference.isNegative) {
       indicatorColor = AppColors.errorColor;
       statusText = 'Overdue by ${-daysLeft} days';
-    } else if (daysLeft <= 1) {
-      indicatorColor = AppColors.warningColor;
-      statusText = difference.inHours <= 24 
-          ? 'Due in ${difference.inHours} hours' 
-          : 'Due tomorrow';
-    } else if (daysLeft <= 3) {
+    }
+    else if (difference.inHours < 24) {
       indicatorColor = Colors.orange;
+      statusText = 'Due in ${difference.inHours} hours';
+    }
+    else if (dueDateOnly == tomorrowDate) {
+      indicatorColor = Colors.orange;
+      statusText = 'Due tomorrow';
+    }
+    else if (daysLeft <= 3) {
+      indicatorColor = AppColors.warningColor;
       statusText = 'Due in $daysLeft days';
-    } else {
+    }
+    else {
       indicatorColor = AppColors.successColor;
       statusText = 'Due in $daysLeft days';
     }
@@ -449,7 +459,7 @@ Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
                       context, 
                       'Category',
                       _getCategoryName(workOrder.categoryId),
-                      Icons.category,
+                      Icons.location_on_outlined,
                     ),
                   ),
                   const SizedBox(width: 16),
