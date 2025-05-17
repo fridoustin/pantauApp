@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/features/notification/domain/notification.dart' as domain;
-import 'package:pantau_app/common/widgets/notification_tile.dart';
+import 'package:pantau_app/features/notification/presentation/widget/notification_tile.dart';
 import 'package:pantau_app/features/notification/presentation/providers/notification_providers.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -38,6 +38,14 @@ class NotificationSection extends ConsumerWidget {
             onTap: () {
               // Mark notification as read when tapped
               ref.read(notificationControllerProvider.notifier).markNotificationAsRead(notif.id);
+              // Navigate to detail
+              if (notif.workOrderId != null) {
+                Navigator.pushNamed(
+                  context, 
+                  '/workorder/detail',
+                  arguments: notif.workOrderId,
+                );
+              };
             },
           );
         }),

@@ -22,7 +22,7 @@ class Notification {
       message: json['message'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       isRead: json['is_read'] as bool,
-      workOrderId: json['workOrderId'] as String?,
+      workOrderId: json['wo_id'] as String?,
     );
   }
 

@@ -63,11 +63,10 @@ class NotificationController extends StateNotifier<AsyncValue<List<domain.Notifi
         state = AsyncValue.data(updatedList);
       });
       
-      // Refresh the provider that depends on technician ID
+      // Refresh the provider
       // This will cause UI to update
       _ref.invalidate(workOrderNotificationsProvider);
     } catch (e) {
-      // Handle error - you might want to show a toast or alert
       print('Error marking notification as read: $e');
     }
   }
