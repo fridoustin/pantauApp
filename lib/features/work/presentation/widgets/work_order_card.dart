@@ -145,7 +145,7 @@ class WorkOrderCard extends ConsumerWidget {
         backgroundColor: AppColors.cardColor,
         title: const Text('Confirm Status Change'),
         content: const Text(
-          "Are you sure you want to revert this work order from “Selesai”? If you do, you’ll need to create a new report when you mark it as “Selesai” again.",
+          "Are you sure you want to revert this work order from “Selesai”?",
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         actions: [
@@ -193,6 +193,8 @@ class WorkOrderCard extends ConsumerWidget {
                       '/workorder/report',
                       arguments: workOrder.id,
                     );
+                  } else if (workOrder.status != 'selesai' && workOrder.afterPhoto == null) {
+                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'selesai');
                   }
                 },
               ),

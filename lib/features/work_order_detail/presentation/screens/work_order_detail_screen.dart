@@ -592,7 +592,7 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                   return Expanded(
                     child: InkWell(
                       onTap: () {
-                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai') {
+                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai' && workOrder.afterPhoto == null) {
                           Navigator.pushNamed(
                             context, 
                             '/workorder/report',
@@ -605,7 +605,7 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                               backgroundColor: AppColors.cardColor,
                               title: const Text('Confirm Status Change'),
                               content: const Text(
-                                "Are you sure you want to revert this work order from “Selesai”? If you do, you’ll need to create a new report when you mark it as “Selesai” again.",
+                                "Are you sure you want to revert this work order from “Selesai”?",
                               ),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               actions: [
