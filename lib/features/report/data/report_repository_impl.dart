@@ -10,16 +10,15 @@ class ReportRepository {
   Future<List<Report>> getReportsByWorkOrderId(String workOrderId) async {
     try {
       final List<Map<String, dynamic>> reportData = await _supabaseClient
-          .from('report')
+          .from('workorder')
           .select('''
-            id, 
-            before_photo, 
-            after_photo, 
+            id,
+            after_url, 
+            before_url, 
             note, 
-            created_at,
-            wo_id
+            report_created_at
           ''')
-          .eq('wo_id', workOrderId);
+          .eq('id', workOrderId);
 
       return reportData.map((data) => Report.fromJson(data)).toList();
     } catch (e) {

@@ -196,22 +196,24 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
       final supabase = Supabase.instance.client;
       final payload = <String, dynamic>{
-        'before_photo': beforeUrl,
-        'after_photo': afterUrl,
-        'created_at': DateTime.now().toIso8601String(),
-        'wo_id': workOrder.id,
+        'before_url': beforeUrl,
+        'after_url': afterUrl,
+        'report_created_at': DateTime.now().toIso8601String(),
       };
       if (_noteController.text.trim().isNotEmpty) {
         payload['note'] = _noteController.text.trim();
       }
 
-      final insertRes = await supabase
-          .from('report')
-          .insert(payload)
+      try {
+        await supabase
+          .from('workorder')
+          .update(payload)
+          .eq('id', workOrder.id)
           .select()
           .single();
-      if (insertRes.isEmpty) {
-        throw Exception('Gagal menyimpan report');
+      } on PostgrestException catch (e) {
+        // kemungkinan 404 Not Found kalau id tidak ada
+        throw Exception('Gagal menyimpan report: ${e.message}');
       }
 
       await ref

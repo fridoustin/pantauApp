@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/report/domain/report.dart';
 import 'package:pantau_app/features/report/presentation/providers/report_providers.dart';
-import 'package:pantau_app/features/report/presentation/screen/report_edit_screen.dart';
 
 class ReportSection extends ConsumerWidget {
   static const String route = '/workorder/report_screen';
@@ -21,7 +20,7 @@ class ReportSection extends ConsumerWidget {
 
     return reportsAsync.when(
       data: (reports) {
-        if (reports.isEmpty) {
+        if (reports[0].afterPhoto == null) {
           return const SizedBox.shrink();
         } else {
         return _buildReportsList(context, reports);
@@ -140,11 +139,15 @@ class ReportSection extends ConsumerWidget {
       tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       title: Text(
-        'Report on ${DateFormat('dd MMM yyyy').format(report.createdAt)}',
+        'Report on ${report.createdAt != null
+          ? DateFormat('dd MMM yyyy').format(report.createdAt!)
+          : '-'}',
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
-        DateFormat('HH:mm').format(report.createdAt),
+        report.createdAt != null
+          ? DateFormat('HH:mm').format(report.createdAt!)
+          : '-',
         style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
       ),
       children: [
@@ -201,11 +204,8 @@ class ReportSection extends ConsumerWidget {
             onPressed: () {
               Navigator.pushNamed(
                 context,
-                EditReportScreen.route,
-                arguments: {
-                  'workOrderId': workOrderId,
-                  'reportId': report.id,
-                },
+                '/workorder/report_edit',
+                arguments: workOrderId
               );
             },
             icon: const Icon(Icons.edit_outlined, size: 18),

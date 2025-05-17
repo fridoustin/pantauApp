@@ -11,12 +11,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class EditReportScreen extends ConsumerStatefulWidget {
   static const String route = '/workorder/report_edit';
   final String workOrderId;
-  final String reportId;
 
   const EditReportScreen({
     super.key,
     required this.workOrderId,
-    required this.reportId,
   });
 
   @override
@@ -63,15 +61,15 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
     try {
       final supabase = Supabase.instance.client;
       final res = await supabase
-          .from('report')
-          .select('id, before_photo, after_photo, note')
-          .eq('id', widget.reportId)
+          .from('workorder')
+          .select('id, before_url, after_url, note')
+          .eq('id', widget.workOrderId)
           .single();
 
       setState(() {
         _reportId = res['id'] as String?;
-        _beforeUrl = res['before_photo'] as String?;
-        _afterUrl = res['after_photo'] as String?;
+        _beforeUrl = res['before_url'] as String?;
+        _afterUrl = res['after_url'] as String?;
         _noteController.text = res['note'] as String? ?? '';
         _beforePath = _beforeUrl != null ? _extractPath(_beforeUrl!) : null;
         _afterPath = _afterUrl != null ? _extractPath(_afterUrl!) : null;
@@ -236,7 +234,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
         final folder = title.replaceAll(' ', '_').replaceAll(RegExp(r'[^\w\s]+'), '');
         final newPath = '$folder/before-$ts.$ext';
         final url = await _uploadFile(_newBefore!, newPath);
-        updates['before_photo'] = url;
+        updates['before_url'] = url;
       }
 
       // Handle after photo
@@ -249,14 +247,14 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
         final folder = title.replaceAll(' ', '_').replaceAll(RegExp(r'[^\w\s]+'), '');
         final newPath = '$folder/after-$ts.$ext';
         final url = await _uploadFile(_newAfter!, newPath);
-        updates['after_photo'] = url;
+        updates['after_url'] = url;
       }
 
       // Handle note
       updates['note'] = _noteController.text.trim();
 
       if (updates.isNotEmpty) {
-        await supabase.from('report').update(updates).eq('id', reportId);
+        await supabase.from('workorder').update(updates).eq('id', reportId);
         _showSnackBar('Report berhasil diperbarui!', isError: false);
       }
       ref.invalidate(workOrderReportsProvider(widget.workOrderId));

@@ -40,16 +40,9 @@ Route<dynamic> routeGenerators(RouteSettings settings) {
     case ReportScreen.route :
       final workOrderId = settings.arguments as String;
       return _buildPageRoute(ReportScreen(workOrderId: workOrderId));
-    case EditReportScreen.route:
-      final args = settings.arguments as Map<String, String>;
-      final workOrderId = args['workOrderId']!;
-      final reportId = args['reportId']!;
-      return _buildPageRoute(
-        EditReportScreen(
-          workOrderId: workOrderId,
-          reportId: reportId,
-        ),
-      );
+    case EditReportScreen.route :
+      final workOrderId = settings.arguments as String;
+      return _buildPageRoute(EditReportScreen(workOrderId: workOrderId));
     default:
       throw ('Route not found');
   }  

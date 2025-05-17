@@ -10,6 +10,7 @@ class WorkOrder {
   final String technicianId;
   final String? adminId;
   final String? categoryId;
+  final String? afterPhoto;
 
   WorkOrder({
     required this.id,
@@ -23,6 +24,7 @@ class WorkOrder {
     required this.technicianId,
     this.adminId,
     this.categoryId,
+    this.afterPhoto
   });
 
   factory WorkOrder.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class WorkOrder {
       technicianId: json['technician_id'],
       adminId: json['admin_id'],
       categoryId: json['category_id'],
+      afterPhoto: json['after_url'],
     );
   }
 }
