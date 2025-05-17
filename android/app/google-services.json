@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "708056404018",
+    "project_id": "pantau-46a75",
+    "storage_bucket": "pantau-46a75.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708056404018:android:ab18229a07da3a51156c2b",
+        "android_client_info": {
+          "package_name": "com.example.pantau_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcHo8BdP1q9ume9t_2uOyweVJJ3rp5ACE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
