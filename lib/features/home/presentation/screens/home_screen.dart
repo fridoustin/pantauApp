@@ -11,6 +11,10 @@ import 'package:pantau_app/features/home/presentation/widgets/statistic_card.dar
 import 'package:pantau_app/features/home/presentation/widgets/work_status_chart.dart';
 import 'package:pantau_app/features/home/presentation/widgets/performance_card.dart';
 import 'package:pantau_app/features/work/presentation/widgets/work_order_card.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+final supabase = Supabase.instance.client;
 
 // Define a provider for the view mode
 final viewModeProvider = StateProvider<ViewMode>((ref) => ViewMode.today);
@@ -18,13 +22,57 @@ final viewModeProvider = StateProvider<ViewMode>((ref) => ViewMode.today);
 // Enum for view modes
 enum ViewMode { today, all }
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   static const String route = '/home';
 
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    supabase.auth.onAuthStateChange.listen((event) async {
+      await FirebaseMessaging.instance.requestPermission();
+
+      await FirebaseMessaging.instance.getAPNSToken();
+      final fcmToken =
+          await FirebaseMessaging.instance.getToken();
+      if(fcmToken != null) {
+        await _setFcmToken(fcmToken);
+      }
+    });
+    FirebaseMessaging.instance.onTokenRefresh
+        .listen((fcmToken) async {
+      _setFcmToken(fcmToken);
+    });
+
+    FirebaseMessaging.onMessage.listen((payload) {
+      final notification = payload.notification;
+      if (notification != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            '${notification.title} ${notification.body}'
+          )));
+      }
+    });
+  }
+
+  Future <void> _setFcmToken(String fcmToken) async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await supabase
+        .from('technician')
+        .update({'fcm_token': fcmToken})
+        .eq('technician_id', userId);
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
     final workOrdersAsync = ref.watch(workOrdersProvider);
     final statisticsAsync = ref.watch(homeStatisticsProvider);
     final todayWorkOrdersAsync = ref.watch(todayWorkOrdersProvider);
@@ -37,7 +85,6 @@ class HomeScreen extends ConsumerWidget {
       bottomNavigationBar: const NavigationBarWidget(currentIndex: 0),
       body: RefreshIndicator(
         onRefresh: () async {
-          // Refresh data by invalidating the provider
           ref.invalidate(workOrdersProvider);
         },
         child: workOrdersAsync.when(
@@ -45,48 +92,43 @@ class HomeScreen extends ConsumerWidget {
             data: (stats) => todayWorkOrdersAsync.when(
               data: (todayWorkOrders) => overdueWorkOrdersAsync.when(
                 data: (overdueWorkOrders) => _buildContent(
-                  context, 
-                  ref, 
-                  stats, 
-                  todayWorkOrders, 
+                  context,
+                  stats,
+                  todayWorkOrders,
                   overdueWorkOrders,
-                  viewMode
+                  viewMode,
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text('Error: ${error.toString()}', 
-                    style: const TextStyle(color: AppColors.errorColor)),
-                ),
+                error: (error, stack) => _buildError(error),
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Error: ${error.toString()}', 
-                  style: const TextStyle(color: AppColors.errorColor)),
-              ),
+              error: (error, stack) => _buildError(error),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Text('Error: ${error.toString()}', 
-                style: const TextStyle(color: AppColors.errorColor)),
-            ),
+            error: (error, stack) => _buildError(error),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Text('Error: ${error.toString()}', 
-              style: const TextStyle(color: AppColors.errorColor)),
-          ),
+          error: (error, stack) => _buildError(error),
         ),
       ),
     );
   }
 
+  Widget _buildError(Object error) {
+    return Center(
+      child: Text(
+        'Error: ${error.toString()}',
+        style: const TextStyle(color: AppColors.errorColor),
+      ),
+    );
+  }
+
   Widget _buildContent(
-    BuildContext context, 
-    WidgetRef ref,
-    Map<String, int> stats, 
+    BuildContext context,
+    Map<String, int> stats,
     List<WorkOrder> todayWorkOrders,
     List<WorkOrder> overdueWorkOrders,
-    ViewMode viewMode
+    ViewMode viewMode,
   ) {
     return SafeArea(
       child: SingleChildScrollView(
@@ -96,7 +138,6 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome section
               Text(
                 _getGreeting(),
                 style: Theme.of(context).textTheme.titleLarge,
@@ -109,20 +150,17 @@ class HomeScreen extends ConsumerWidget {
                     ),
               ),
               const SizedBox(height: 24),
-
-              // View Toggle Buttons
-              _buildViewToggle(context, ref, viewMode),
+              _buildViewToggle(context, viewMode),
               const SizedBox(height: 24),
-
-              // Dynamic content based on view mode
-              ...viewMode == ViewMode.today 
-                  ? _buildTodayView(context, stats)
-                  : _buildAllView(context, stats),
-
+              if (viewMode == ViewMode.today) ..._buildTodayView(context, stats),
+              if (viewMode == ViewMode.all) ..._buildAllView(context, stats),
               const SizedBox(height: 32),
-              
-              // Work Orders in horizontal layout
-              _buildWorkOrdersSection(context, todayWorkOrders, overdueWorkOrders, stats),
+              _buildWorkOrdersSection(
+                context,
+                todayWorkOrders,
+                overdueWorkOrders,
+                stats,
+              ),
             ],
           ),
         ),
@@ -130,7 +168,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildViewToggle(BuildContext context, WidgetRef ref, ViewMode currentMode) {
+  Widget _buildViewToggle(BuildContext context, ViewMode currentMode) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -140,14 +178,14 @@ class HomeScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildToggleButton(
-            context, 
-            'TODAY', 
+            context,
+            'TODAY',
             currentMode == ViewMode.today,
             () => ref.read(viewModeProvider.notifier).state = ViewMode.today,
           ),
           _buildToggleButton(
-            context, 
-            'ALL', 
+            context,
+            'ALL',
             currentMode == ViewMode.all,
             () => ref.read(viewModeProvider.notifier).state = ViewMode.all,
           ),
@@ -156,7 +194,12 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildToggleButton(BuildContext context, String title, bool isActive, VoidCallback onTap) {
+  Widget _buildToggleButton(
+    BuildContext context,
+    String title,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -176,173 +219,153 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildTodayView(BuildContext context, Map<String, int> stats) {
-    return [
-      // Statistics cards for Today
-      Row(
-        children: [
-          Expanded(
-            child: StatisticCard(
-              title: 'Today WO',
-              value: stats['today'].toString(),
-              iconData: Icons.today_outlined,
-              color: AppColors.black,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: StatisticCard(
-              title: 'Today Completed',
-              value: stats['todayCompleted'].toString(),
-              iconData: Icons.done,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 24),
-      
-      // Floor Statistics Card for Today
-      CategoryStatisticsCard(
-        title: 'Today Category Distribution',
-        floorStats: stats,
-        isToday: true,
-      ),
-      const SizedBox(height: 24),
-
-      // Performance card for Today
-      PerformanceCard(
-        title: "Today Progress",
-        totalTasks: stats['today'] ?? 0,
-        completedTasks: stats['todayCompleted'] ?? 0,
-        averageCompletionTimeHours: stats['todayAverageCompletionTimeHours'] ?? 0,
-      ),
-
-      const SizedBox(height: 24),
-      
-      // Chart section for Today
-      Card(
-        color: AppColors.cardColor,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Today Work Order Status',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+  List<Widget> _buildTodayView(BuildContext context, Map<String, int> stats) => [
+        Row(
+          children: [
+            Expanded(
+              child: StatisticCard(
+                title: 'Today WO',
+                value: stats['today'].toString(),
+                iconData: Icons.today_outlined,
+                color: AppColors.black,
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: WorkStatusChart(
-                  notStarted: stats['todayNotStarted'] ?? 0,
-                  inProgress: stats['todayInProgress'] ?? 0,
-                  pending: stats['todayPending'] ?? 0,
-                  completed: stats['todayCompleted'] ?? 0,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: StatisticCard(
+                title: 'Today Completed',
+                value: stats['todayCompleted'].toString(),
+                iconData: Icons.done,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        CategoryStatisticsCard(
+          title: 'Today Category Distribution',
+          floorStats: stats,
+          isToday: true,
+        ),
+        const SizedBox(height: 24),
+        PerformanceCard(
+          title: "Today Progress",
+          totalTasks: stats['today'] ?? 0,
+          completedTasks: stats['todayCompleted'] ?? 0,
+          averageCompletionTimeHours: stats['todayAverageCompletionTimeHours'] ?? 0,
+        ),
+        const SizedBox(height: 24),
+        Card(
+          color: AppColors.cardColor,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Today Work Order Status',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildAllView(BuildContext context, Map<String, int> stats) {
-    return [
-      // Statistics cards for All Time
-      Row(
-        children: [
-          Expanded(
-            child: StatisticCard(
-              title: 'Total WO',
-              value: stats['total'].toString(),
-              iconData: Icons.calendar_month,
-              color: AppColors.black,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: StatisticCard(
-              title: 'Total Completed',
-              value: stats['completed'].toString(),
-              iconData: Icons.done_all,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 24),
-      
-      // Floor Statistics Card for All Time
-      CategoryStatisticsCard(
-        title: 'Category Distribution',
-        floorStats: stats,
-        isToday: false,
-      ),
-      const SizedBox(height: 24),
-
-      // Performance card for All Time
-      PerformanceCard(
-        title: "Progress",
-        totalTasks: stats['total'] ?? 0,
-        completedTasks: stats['completed'] ?? 0,
-        averageCompletionTimeHours: stats['averageCompletionTimeHours'] ?? 0,
-      ),
-      const SizedBox(height: 24),
-
-      // Chart section for All Time
-      Card(
-        color: AppColors.cardColor,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Work Order Status',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: WorkStatusChart(
-                  notStarted: stats['notStarted'] ?? 0,
-                  inProgress: stats['inProgress'] ?? 0,
-                  pending: stats['pending'] ?? 0,
-                  completed: stats['completed'] ?? 0,
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 200,
+                  child: WorkStatusChart(
+                    notStarted: stats['todayNotStarted'] ?? 0,
+                    inProgress: stats['todayInProgress'] ?? 0,
+                    pending: stats['todayPending'] ?? 0,
+                    completed: stats['todayCompleted'] ?? 0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    ];
-  }
+      ];
+
+  List<Widget> _buildAllView(BuildContext context, Map<String, int> stats) => [
+        Row(
+          children: [
+            Expanded(
+              child: StatisticCard(
+                title: 'Total WO',
+                value: stats['total'].toString(),
+                iconData: Icons.calendar_month,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: StatisticCard(
+                title: 'Total Completed',
+                value: stats['completed'].toString(),
+                iconData: Icons.done_all,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        CategoryStatisticsCard(
+          title: 'Category Distribution',
+          floorStats: stats,
+          isToday: false,
+        ),
+        const SizedBox(height: 24),
+        PerformanceCard(
+          title: "Progress",
+          totalTasks: stats['total'] ?? 0,
+          completedTasks: stats['completed'] ?? 0,
+          averageCompletionTimeHours: stats['averageCompletionTimeHours'] ?? 0,
+        ),
+        const SizedBox(height: 24),
+        Card(
+          color: AppColors.cardColor,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Work Order Status',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 200,
+                  child: WorkStatusChart(
+                    notStarted: stats['notStarted'] ?? 0,
+                    inProgress: stats['inProgress'] ?? 0,
+                    pending: stats['pending'] ?? 0,
+                    completed: stats['completed'] ?? 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ];
 
   Widget _buildWorkOrdersSection(
-    BuildContext context, 
-    List<WorkOrder> todayWorkOrders, 
+    BuildContext context,
+    List<WorkOrder> todayWorkOrders,
     List<WorkOrder> overdueWorkOrders,
-    Map<String, int> stats
+    Map<String, int> stats,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Today work orders section
         Text(
           'Today Work Order (${stats['today']! - stats['todayCompleted']!})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -368,14 +391,9 @@ class HomeScreen extends ConsumerWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: todayWorkOrders.length,
-                itemBuilder: (context, index) {
-                  final workOrder = todayWorkOrders[index];
-                  return WorkOrderCard(workOrder: workOrder);
-                },
+                itemBuilder: (context, index) => WorkOrderCard(workOrder: todayWorkOrders[index]),
               ),
         const SizedBox(height: 24),
-
-        // Overdue work orders section
         Text(
           'Overdue Work Order (${stats['overdue']})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -383,7 +401,6 @@ class HomeScreen extends ConsumerWidget {
               ),
         ),
         const SizedBox(height: 16),
-        // Display overdue work orders
         overdueWorkOrders.isEmpty
             ? const Card(
                 color: AppColors.cardColor,
@@ -402,24 +419,19 @@ class HomeScreen extends ConsumerWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: overdueWorkOrders.length,
-                itemBuilder: (context, index) {
-                  final workOrder = overdueWorkOrders[index];
-                  return WorkOrderCard(
-                    workOrder: workOrder,
-                  );
-                },
+                itemBuilder: (context, index) => WorkOrderCard(workOrder: overdueWorkOrders[index]),
               ),
       ],
     );
   }
-  
+
   String _getGreeting() {
-    final todayHour = DateTime.now().hour;
-    if (todayHour >= 5 && todayHour < 11) {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 11) {
       return 'Selamat Pagi';
-    } else if (todayHour >= 11 && todayHour < 15) {
+    } else if (hour >= 11 && hour < 15) {
       return 'Selamat Siang';
-    } else if (todayHour >= 15 && todayHour < 18) {
+    } else if (hour >= 15 && hour < 18) {
       return 'Selamat Sore';
     } else {
       return 'Selamat Malam';
