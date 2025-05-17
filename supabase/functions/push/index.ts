@@ -36,6 +36,15 @@ Deno.serve(async (req) => {
     privateKey: serviceAccount.private_key,
   })
 
+  await supabase
+    .from('notification')
+    .insert({
+      'technician_id': payload.record.technician_id, 
+      'title': 'Work Order Baru', 
+      'message': `Anda menerima work order baru dengan judul ${payload.record.title}`,
+      'wo_id': payload.record.id
+    })
+
   const res = await fetch(
     `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
     {
