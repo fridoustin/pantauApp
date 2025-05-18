@@ -22,8 +22,14 @@ class WorkStatusChart extends StatelessWidget {
     
     // Avoid division by zero
     if (total == 0) {
-      return const Center(
-        child: Text('No data to display'),
+      return Center(
+        child: Text(
+          'No data to display',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+        ),
       );
     }
 
