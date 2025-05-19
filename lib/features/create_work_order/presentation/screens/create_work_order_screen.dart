@@ -32,7 +32,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(createWorkOrderProvider, (_, state) {
       state.when(
-        data: (_) => Navigator.of(context).pop(),
+        data: (_) => _createSuccess(),
         loading: () => setState(() => _isSubmitting = true),
         error: (e, _) {
           setState(() => _isSubmitting = false);
@@ -66,6 +66,16 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
         child: _buildBody(),
       ),
     );
+  }
+
+  void _createSuccess() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Work order created successfully'),
+        backgroundColor: AppColors.successColor,
+      ),
+    );
+    Navigator.of(context).pop();
   }
 
   Widget _buildBody() {
@@ -107,7 +117,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
             TextFormField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'Enter work order title',
+                hintText: 'Enter work order title...',
                 filled: true,
                 fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(
@@ -134,7 +144,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
             TextFormField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                hintText: 'Enter work order description',
+                hintText: 'Enter work order description...',
                 filled: true,
                 fillColor: AppColors.cardColor,
                 border: OutlineInputBorder(

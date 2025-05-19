@@ -43,4 +43,12 @@ class WorkOrderRepositoryImpl implements WorkOrderRepository {
         .update(data)
         .eq('id', id);
   }
+
+  @override
+  Future<void> deleteWorkOrder(String id) async {
+    await _supabaseClient
+        .from('workorder')
+        .delete()
+        .eq('id', id);
+  }
 }

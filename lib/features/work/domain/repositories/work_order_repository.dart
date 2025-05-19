@@ -5,4 +5,5 @@ abstract class WorkOrderRepository {
   Future<void> updateWorkOrderStatus(String id, String status);
   Future<void> updateWorkOrder(String id, Map<String, dynamic> data);
   Future<void> updateStartTime(String id);
+  Future<void> deleteWorkOrder(String id);
 }

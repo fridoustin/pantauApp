@@ -1,33 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantau_app/common/widgets/notification_tile.dart';
 import 'package:pantau_app/core/constant/colors.dart';
-import 'package:pantau_app/features/notification/domain/entities/notification_entity.dart';
+import 'package:pantau_app/features/notification/domain/notification.dart' as domain;
 import 'package:pantau_app/features/notification/presentation/providers/notification_providers.dart';
+import 'package:pantau_app/features/notification/presentation/widget/notification_section.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-/// Using ConsumerStatefulWidget to perform initial data fetch in initState
 class NotificationScreen extends ConsumerStatefulWidget {
   static const String route = '/notification';
-  const NotificationScreen({super.key});
+  
+  const NotificationScreen({
+    super.key,
+  });
 
   @override
   ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends ConsumerState<NotificationScreen> {
+class _NotificationScreenState extends ConsumerState<NotificationScreen> with WidgetsBindingObserver {
+  bool _isFirstLoad = true;
+
   @override
   void initState() {
     super.initState();
-    // Fetch notifications only once when the screen is initialized.
-    Future.microtask(() {
-      ref.read(notificationNotifierProvider.notifier).fetchNotifications();
-    });
+    // Initialize timeago locale for Indonesian
+    timeago.setLocaleMessages('id', timeago.IdMessages());
+    
+    // Register as observer to detect app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Hanya refresh pada load pertama atau saat kembali ke screen
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      // Delay untuk memastikan widget sudah ter-mount
+      Future.microtask(() => _refreshNotifications());
+    }
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh data when app comes back to foreground
+    if (state == AppLifecycleState.resumed) {
+      _refreshNotifications();
+    }
+  }
+  
+  @override
+  void dispose() {
+    // Unregister the observer when the screen is disposed
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
+  void _refreshNotifications() {
+    // Only call this if the widget is still mounted
+    if (!mounted) return;
+    
+    // Invalidate the provider to force a refresh
+    ref.invalidate(workOrderNotificationsProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-    final notificationState = ref.watch(notificationNotifierProvider);
+    final notificationsAsync = ref.watch(workOrderNotificationsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,62 +79,72 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         centerTitle: true,
       ),
       backgroundColor: AppColors.backgroundColor,
-      body: _buildBody(notificationState),
+      body: _buildBody(notificationsAsync),
     );
   }
 
-  Widget _buildBody(notificationState) {
-    if (notificationState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (notificationState.errorMessage != null) {
-      return Center(child: Text('Error: ${notificationState.errorMessage}'));
-    }
-    final notifications = notificationState.notifications;
-    if (notifications.isEmpty) {
-      return const Center(child: Text('No notifications'));
-    }
+  Widget _buildBody(AsyncValue<List<domain.Notification>> notificationsAsync) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Pull-to-refresh functionality
+        _refreshNotifications();
+      },
+      child: notificationsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        data: (notifications) {
+          if (notifications.isEmpty) {
+            // Return a scrollable container for empty state so pull-to-refresh works
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 150),
+                Center(child: Text('No notifications')),
+              ],
+            );
+          }
 
-    // Create a copy and sort notifications by createdAt (newest first)
-    final sortedNotifications = List<NotificationEntity>.from(notifications)
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          final sortedNotifications = List<domain.Notification>.from(notifications)
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-    // Group notifications based on their createdAt date.
-    final grouped = _groupNotifications(sortedNotifications);
+          final grouped = _groupNotifications(sortedNotifications);
 
-    return ListView(
-      children: [
-        if (grouped['Today']!.isNotEmpty)
-          NotificationSection(
-            sectionTitle: 'Today',
-            notifications: grouped['Today']!,
-          ),
-        if (grouped['Yesterday']!.isNotEmpty)
-          NotificationSection(
-            sectionTitle: 'Yesterday',
-            notifications: grouped['Yesterday']!,
-          ),
-        if (grouped['This Week']!.isNotEmpty)
-          NotificationSection(
-            sectionTitle: 'This Week',
-            notifications: grouped['This Week']!,
-          ),
-        if (grouped['Older']!.isNotEmpty)
-          NotificationSection(
-            sectionTitle: 'Older',
-            notifications: grouped['Older']!,
-          ),
-      ],
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+            children: [
+              if (grouped['Today']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Today',
+                  notifications: grouped['Today']!,
+                ),
+              if (grouped['Yesterday']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Yesterday',
+                  notifications: grouped['Yesterday']!,
+                ),
+              if (grouped['This Week']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'This Week',
+                  notifications: grouped['This Week']!,
+                ),
+              if (grouped['Older']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Older',
+                  notifications: grouped['Older']!,
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
-  /// Group notifications based on the date they were created.
-  Map<String, List<NotificationEntity>> _groupNotifications(
-      List<NotificationEntity> notifications) {
-    final today = <NotificationEntity>[];
-    final yesterday = <NotificationEntity>[];
-    final thisWeek = <NotificationEntity>[];
-    final older = <NotificationEntity>[];
+  Map<String, List<domain.Notification>> _groupNotifications(
+      List<domain.Notification> notifications) {
+    final today = <domain.Notification>[];
+    final yesterday = <domain.Notification>[];
+    final thisWeek = <domain.Notification>[];
+    final older = <domain.Notification>[];
 
     final now = DateTime.now();
     final startOfToday = DateTime(now.year, now.month, now.day);
@@ -120,52 +170,5 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
       'This Week': thisWeek,
       'Older': older,
     };
-  }
-}
-
-class NotificationSection extends ConsumerWidget {
-  final String sectionTitle;
-  final List<NotificationEntity> notifications;
-
-  const NotificationSection({
-    super.key,
-    required this.sectionTitle,
-    required this.notifications,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Using ref.read because we only need to trigger an action without rebuild.
-    final notifier = ref.read(notificationNotifierProvider.notifier);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            sectionTitle,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        // List notifications within this section.
-        ...notifications.map((notif) {
-          // Format the createdAt date to relative time string.
-          final relativeTime = timeago.format(notif.createdAt, locale: 'id');
-
-          return NotificationTile(
-            title: notif.title,
-            message: notif.message,
-            timeAgo: relativeTime,
-            isUnread: !notif.isRead,
-            // On tap, mark the notification as read
-            onTap: () {
-              notifier.markAsRead(notif.id);
-            },
-          );
-        }),
-      ],
-    );
   }
 }

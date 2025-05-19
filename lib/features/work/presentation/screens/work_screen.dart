@@ -81,7 +81,7 @@ class WorkScreen extends ConsumerWidget {
         : ref.watch(historyWorkOrdersProvider);
     
     return AppScaffold(
-      appBar: const CustomAppBar(title: "Work Orders"),
+      appBar: const CustomAppBar(title: "Work"),
       currentIndex: 1,
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/createworkorder'),
@@ -206,7 +206,7 @@ class WorkScreen extends ConsumerWidget {
   
   Widget _buildEmptyState(WorkMode mode) {
     String message = mode == WorkMode.todo 
-      ? "No pending work orders" 
+      ? "No work orders" 
       : "No completed work orders";
     
     IconData icon = mode == WorkMode.todo 
@@ -232,7 +232,7 @@ class WorkScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               mode == WorkMode.todo 
-                ? "Add new work orders to get started." 
+                ? "Your not completed work orders will appear here." 
                 : "Your completed work orders will appear here.",
               textAlign: TextAlign.center,
               style: TextStyle(

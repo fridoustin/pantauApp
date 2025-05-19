@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/common/widgets/layout/app_scaffold.dart';
 import 'package:pantau_app/core/constant/colors.dart';
-import 'package:pantau_app/features/calendar/domain/models/work_order.dart';
 import 'package:pantau_app/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:pantau_app/features/calendar/presentation/viewmodels/calendar_viewmodel.dart';
-import 'package:pantau_app/features/calendar/presentation/widgets/work_order_card.dart';
+import 'package:pantau_app/features/work/domain/models/work_order.dart';
+import 'package:pantau_app/features/work/presentation/widgets/work_order_card.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarScreen extends ConsumerWidget {

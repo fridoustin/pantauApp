@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/report/presentation/widget/report_section_widget.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 import 'package:pantau_app/features/work_order_detail/presentation/providers/work_order_detail_provider.dart';
@@ -81,12 +82,13 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           
           // Status options
           _buildStatusSection(context, ref, workOrder),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+
+          // Report section
+          ReportSection(workOrderId: workOrderId),
           
           // Action buttons
-          _buildActionButtons(context, workOrder),
-          
-          const SizedBox(height: 40),
+          _buildActionButtons(context, ref, workOrder),          
         ],
       ),
     );
@@ -121,10 +123,10 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.category_outlined, size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                _getCategoryName(workOrder.categoryId),
+                _getCategoryName(workOrder.categoryId).isEmpty ? '-' : _getCategoryName(workOrder.categoryId),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -311,7 +313,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
             ),
             
             // Show deadline indicator if due date exists
-            if (workOrder.endTime != null)
+            if (workOrder.endTime != null && (workOrder.status != 'selesai' || (workOrder.status == 'selesai' && workOrder.updatedAt != null && workOrder.endTime!.difference(workOrder.updatedAt!).isNegative)))
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: _buildDeadlineIndicator(context, workOrder.endTime!),
@@ -364,22 +366,32 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     final now = DateTime.now();
     final difference = dueDate.difference(now);
     final daysLeft = difference.inDays;
-    
+
+    // untuk membandingkan hanya bagian date (year, month, day)
+    final todayDate = DateTime(now.year, now.month, now.day);
+    final tomorrowDate = todayDate.add(const Duration(days: 1));
+    final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+
     Color indicatorColor;
     String statusText;
-    
+
     if (difference.isNegative) {
       indicatorColor = AppColors.errorColor;
       statusText = 'Overdue by ${-daysLeft} days';
-    } else if (daysLeft <= 1) {
-      indicatorColor = AppColors.warningColor;
-      statusText = difference.inHours <= 24 
-          ? 'Due in ${difference.inHours} hours' 
-          : 'Due tomorrow';
-    } else if (daysLeft <= 3) {
+    }
+    else if (difference.inHours < 24) {
       indicatorColor = Colors.orange;
+      statusText = 'Due in ${difference.inHours} hours';
+    }
+    else if (dueDateOnly == tomorrowDate) {
+      indicatorColor = Colors.orange;
+      statusText = 'Due tomorrow';
+    }
+    else if (daysLeft <= 3) {
+      indicatorColor = AppColors.warningColor;
       statusText = 'Due in $daysLeft days';
-    } else {
+    }
+    else {
       indicatorColor = AppColors.successColor;
       statusText = 'Due in $daysLeft days';
     }
@@ -447,7 +459,7 @@ Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
                       context, 
                       'Category',
                       _getCategoryName(workOrder.categoryId),
-                      Icons.category,
+                      Icons.location_on_outlined,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -580,14 +592,53 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                   return Expanded(
                     child: InkWell(
                       onTap: () {
-                        _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai' && workOrder.afterPhoto == null) {
+                          Navigator.pushNamed(
+                            context, 
+                            '/workorder/report',
+                            arguments: workOrder.id,
+                          );
+                        } else if (statuses[index] != 'selesai' && workOrder.status == 'selesai') {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: AppColors.cardColor,
+                              title: const Text('Confirm Status Change'),
+                              content: const Text(
+                                "Are you sure you want to revert this work order from “Selesai”?",
+                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(), 
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                                    Navigator.of(ctx).pop();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.errorColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text('Yes, Revert'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        else {
+                          _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         height: 105,
                         decoration: BoxDecoration(
                           color: isSelected 
-                              ? statusColors[index].withOpacity(0.2) 
+                              ? statusColors[index].withValues(alpha: 0.2) 
                               : Colors.transparent,
                           border: Border(
                             bottom: BorderSide(
@@ -637,11 +688,11 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
     );
   }
   
-  Widget _buildActionButtons(BuildContext context, WorkOrder workOrder) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     return Column(
       children: [
         // Edit button (hanya muncul saat tidak ada admin di database)
-        if (workOrder.adminId == null || workOrder.adminId!.isEmpty)
+        if (workOrder.adminId == null || workOrder.adminId!.isEmpty) ...[
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -668,6 +719,61 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
               ),
             ),
           ),
+
+          const SizedBox(height: 8),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.cardColor,
+                    title: const Text('Confirm Deletion'),
+                    content: const Text(
+                      "Are you sure you want to delete this work order?",
+                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(), 
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _deleteWorkOrder(ref, workOrderId);
+                          Navigator.of(ctx).pop();
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.errorColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+              label: const Text('Delete Work Order'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.errorColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ]
       ],
     );
   }
@@ -677,6 +783,10 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
     if (workOrderStartTime == null && newStatus == 'dalam_pengerjaan') {
       ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrderId);
     }
+  }
+
+  void _deleteWorkOrder(WidgetRef ref, String workOrderId) {
+    ref.read(workOrderViewModelProvider.notifier).deleteWorkOrder(workOrderId);
   }
 
   String _getCategoryName(String? categoryId) {

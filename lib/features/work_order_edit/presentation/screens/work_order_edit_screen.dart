@@ -69,7 +69,7 @@ class _WorkOrderEditScreenState extends ConsumerState<WorkOrderEditScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold
-            ) 
+            ),
           ),
           centerTitle: true,
         ),
