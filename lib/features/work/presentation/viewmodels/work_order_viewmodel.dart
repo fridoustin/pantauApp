@@ -27,6 +27,16 @@ class WorkOrderViewModel extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> deleteWorkOrder(String id) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.deleteWorkOrder(id);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
 
 final workOrderViewModelProvider = StateNotifierProvider<WorkOrderViewModel, AsyncValue<void>>((ref) {

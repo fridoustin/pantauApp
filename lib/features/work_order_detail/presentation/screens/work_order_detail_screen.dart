@@ -88,7 +88,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           ReportSection(workOrderId: workOrderId),
           
           // Action buttons
-          _buildActionButtons(context, workOrder),          
+          _buildActionButtons(context, ref, workOrder),          
         ],
       ),
     );
@@ -688,11 +688,11 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
     );
   }
   
-  Widget _buildActionButtons(BuildContext context, WorkOrder workOrder) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     return Column(
       children: [
         // Edit button (hanya muncul saat tidak ada admin di database)
-        if (workOrder.adminId == null || workOrder.adminId!.isEmpty)
+        if (workOrder.adminId == null || workOrder.adminId!.isEmpty) ...[
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -719,6 +719,61 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
               ),
             ),
           ),
+
+          const SizedBox(height: 8),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.cardColor,
+                    title: const Text('Confirm Deletion'),
+                    content: const Text(
+                      "Are you sure you want to delete this work order?",
+                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(), 
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _deleteWorkOrder(ref, workOrderId);
+                          Navigator.of(ctx).pop();
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.errorColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+              label: const Text('Delete Work Order'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.errorColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ]
       ],
     );
   }
@@ -728,6 +783,10 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
     if (workOrderStartTime == null && newStatus == 'dalam_pengerjaan') {
       ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrderId);
     }
+  }
+
+  void _deleteWorkOrder(WidgetRef ref, String workOrderId) {
+    ref.read(workOrderViewModelProvider.notifier).deleteWorkOrder(workOrderId);
   }
 
   String _getCategoryName(String? categoryId) {
