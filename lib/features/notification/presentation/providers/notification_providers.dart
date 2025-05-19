@@ -70,6 +70,29 @@ class NotificationController extends StateNotifier<AsyncValue<List<domain.Notifi
       print('Error marking notification as read: $e');
     }
   }
+  
+  // Method to delete a notification
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      // Delete notification from database
+      await _repository.deleteNotification(notificationId);
+      
+      // Update local state
+      state.whenData((notifications) {
+        final updatedList = notifications.where(
+          (notification) => notification.id != notificationId
+        ).toList();
+        
+        state = AsyncValue.data(updatedList);
+      });
+      
+      // Refresh the provider
+      // This will cause UI to update
+      _ref.invalidate(workOrderNotificationsProvider);
+    } catch (e) {
+      print('Error deleting notification: $e');
+    }
+  }
 }
 
 // Provider for the notification controller

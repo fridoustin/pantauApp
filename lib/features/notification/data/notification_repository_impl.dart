@@ -36,4 +36,15 @@ class NotificationRepository {
       throw Exception('Failed to mark notification as read: $e');
     }
   }
+
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      await _supabaseClient
+          .from('notification')
+          .delete()
+          .eq('id', notificationId);
+    } catch (e) {
+      throw Exception('Failed to delete notification: $e');
+    }
+  }
 }

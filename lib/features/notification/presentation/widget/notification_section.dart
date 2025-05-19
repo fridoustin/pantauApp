@@ -35,6 +35,7 @@ class NotificationSection extends ConsumerWidget {
             message: notif.message,
             timeAgo: relativeTime,
             isUnread: !notif.isRead,
+            notificationId: notif.id,
             onTap: () {
               // Mark notification as read when tapped
               ref.read(notificationControllerProvider.notifier).markNotificationAsRead(notif.id);
