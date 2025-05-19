@@ -17,12 +17,52 @@ class NotificationScreen extends ConsumerStatefulWidget {
   ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends ConsumerState<NotificationScreen> {
+class _NotificationScreenState extends ConsumerState<NotificationScreen> with WidgetsBindingObserver {
+  bool _isFirstLoad = true;
+
   @override
   void initState() {
     super.initState();
     // Initialize timeago locale for Indonesian
     timeago.setLocaleMessages('id', timeago.IdMessages());
+    
+    // Register as observer to detect app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Hanya refresh pada load pertama atau saat kembali ke screen
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      // Delay untuk memastikan widget sudah ter-mount
+      Future.microtask(() => _refreshNotifications());
+    }
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh data when app comes back to foreground
+    if (state == AppLifecycleState.resumed) {
+      _refreshNotifications();
+    }
+  }
+  
+  @override
+  void dispose() {
+    // Unregister the observer when the screen is disposed
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
+  void _refreshNotifications() {
+    // Only call this if the widget is still mounted
+    if (!mounted) return;
+    
+    // Invalidate the provider to force a refresh
+    ref.invalidate(workOrderNotificationsProvider);
   }
 
   @override
@@ -44,44 +84,58 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   }
 
   Widget _buildBody(AsyncValue<List<domain.Notification>> notificationsAsync) {
-    return notificationsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(child: Text('Error: $error')),
-      data: (notifications) {
-        if (notifications.isEmpty) {
-          return const Center(child: Text('No notifications'));
-        }
-
-        final sortedNotifications = List<domain.Notification>.from(notifications)
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-        final grouped = _groupNotifications(sortedNotifications);
-
-        return ListView(
-          children: [
-            if (grouped['Today']!.isNotEmpty)
-              NotificationSection(
-                sectionTitle: 'Today',
-                notifications: grouped['Today']!,
-              ),
-            if (grouped['Yesterday']!.isNotEmpty)
-              NotificationSection(
-                sectionTitle: 'Yesterday',
-                notifications: grouped['Yesterday']!,
-              ),
-            if (grouped['This Week']!.isNotEmpty)
-              NotificationSection(
-                sectionTitle: 'This Week',
-                notifications: grouped['This Week']!,
-              ),
-            if (grouped['Older']!.isNotEmpty)
-              NotificationSection(
-                sectionTitle: 'Older',
-                notifications: grouped['Older']!,
-              ),
-          ],
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Pull-to-refresh functionality
+        _refreshNotifications();
       },
+      child: notificationsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        data: (notifications) {
+          if (notifications.isEmpty) {
+            // Return a scrollable container for empty state so pull-to-refresh works
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 150),
+                Center(child: Text('No notifications')),
+              ],
+            );
+          }
+
+          final sortedNotifications = List<domain.Notification>.from(notifications)
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+          final grouped = _groupNotifications(sortedNotifications);
+
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+            children: [
+              if (grouped['Today']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Today',
+                  notifications: grouped['Today']!,
+                ),
+              if (grouped['Yesterday']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Yesterday',
+                  notifications: grouped['Yesterday']!,
+                ),
+              if (grouped['This Week']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'This Week',
+                  notifications: grouped['This Week']!,
+                ),
+              if (grouped['Older']!.isNotEmpty)
+                NotificationSection(
+                  sectionTitle: 'Older',
+                  notifications: grouped['Older']!,
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
