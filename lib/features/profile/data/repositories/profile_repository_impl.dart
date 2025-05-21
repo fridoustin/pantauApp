@@ -57,4 +57,30 @@ class ProfileRepositoryImpl implements ProfileRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = client.auth.currentUser;
+    if (user == null) throw Exception('User belum login');
+
+    // Verifikasi dengan login ulang
+    final authRes = await client.auth.signInWithPassword(
+      email: user.email!,
+      password: currentPassword,
+    );
+    if (authRes.session == null) {
+      throw Exception('Password lama salah');
+    }
+
+    // Update password
+    final updateRes = await client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+    if (updateRes.user == null) {
+      throw Exception('Gagal memperbarui password');
+    }
+  }
 }

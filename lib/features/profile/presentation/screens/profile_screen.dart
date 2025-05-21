@@ -304,9 +304,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         },
                       ),
                       const Divider(),
-                      const ProfileOption(
+                      ProfileOption(
                         icon: 'assets/icons/lock.svg',
                         label: 'Change Password',
+                        onTap: () => Navigator.pushNamed(context, '/changepassword')
                       ),
                       const Divider(),
                       const ProfileOption(
