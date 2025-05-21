@@ -1,90 +1,19 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:pantau_app/features/profile/data/repositories/profile_repository_impl.dart';
-import 'package:pantau_app/features/profile/domain/usecases/update_profile_usecase.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/profile/presentation/providers/technician_profile_provider.dart';
 
-class EditProfileScreen extends StatefulWidget {
+class EditProfileScreen extends ConsumerWidget {
   static const route = '/edit-profile';
 
   const EditProfileScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(editProfileVMProvider);
+    final ctrl = ref.read(editProfileVMProvider.notifier);
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  File? _selectedImage;
-  bool _isLoading = false;
-
-  final _client = Supabase.instance.client;
-
-  Future<void> _loadInitialProfile() async {
-    final user = _client.auth.currentUser;
-    if (user == null) return;
-
-    final repo = ProfileRepositoryImpl(_client);
-    final profile = await repo.getTechnicianProfile(user.email!);
-    if (profile != null) {
-      _nameController.text = profile['name'] ?? '';
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final result = await picker.pickImage(source: ImageSource.gallery);
-    if (result != null) {
-      setState(() {
-        _selectedImage = File(result.path);
-      });
-    }
-  }
-
-  Future<void> _saveChanges() async {
-    final user = _client.auth.currentUser;
-    if (user == null || _selectedImage == null || _nameController.text.isEmpty) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final repo = ProfileRepositoryImpl(_client);
-      final usecase = UpdateProfileUseCase(repo);
-
-      await usecase.execute(
-        email: user.email!,
-        name: _nameController.text.trim(),
-        image: _selectedImage!,
-        userId: user.id,
-      );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil berhasil diperbarui')),
-      );
-      Navigator.pop(context, true);
-    } catch (e) {
-      debugPrint('ERROR: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memperbarui profil')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadInitialProfile();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Edit Profile', showBackButton: true),
       backgroundColor: Colors.white,
@@ -99,11 +28,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage:
-                      _selectedImage != null ? FileImage(_selectedImage!) : null,
+                  backgroundImage: vm.imageFile != null
+                    ? FileImage(vm.imageFile!) as ImageProvider
+                    : (vm.imageUrl != null
+                        ? NetworkImage(vm.imageUrl!)
+                        : null),
                 ),
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: ctrl.pickImage,
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(
@@ -123,13 +55,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             // Nama Input
             TextFormField(
-              controller: _nameController,
+              initialValue: vm.name,
               decoration: InputDecoration(
                 labelText: 'Nama Lengkap',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onChanged: (v) =>
+                  // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                  ctrl.state = ctrl.state.copyWith(name: v),
             ),
             const SizedBox(height: 32),
 
@@ -137,7 +72,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _saveChanges,
+                onPressed: vm.isLoading
+                    ? null
+                    : () async {
+                        final success = await ctrl.saveChanges();
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Profil berhasil diperbarui')),
+                          );
+                          Navigator.pop(context, true);
+                        } else if (!success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(vm.error ??
+                                    'Gagal memperbarui profil')),
+                          );
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -145,11 +98,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                child: vm.isLoading
+                    ? const CircularProgressIndicator(
+                        color: Colors.white)
                     : const Text(
                         'Simpan Perubahan',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style:
+                            TextStyle(fontSize: 16, color: Colors.white),
                       ),
               ),
             ),
