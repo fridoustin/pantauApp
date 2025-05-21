@@ -16,7 +16,7 @@ class EditProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Edit Profile', showBackButton: true),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
