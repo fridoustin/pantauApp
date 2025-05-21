@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:pantau_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:pantau_app/features/profile/presentation/viewmodels/edit_profile_viewmodel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Provider untuk repository profil
@@ -18,3 +19,12 @@ final technicianProfileProvider = FutureProvider.autoDispose<Map<String, dynamic
   
   return await repository.getTechnicianProfile(email);
 });
+
+/// Provider untuk ViewModel
+final editProfileVMProvider =
+    StateNotifierProvider<EditProfileViewModel, EditProfileState>(
+  (ref) {
+    final repo = ref.watch(profileRepositoryProvider);
+    return EditProfileViewModel(repo);
+  },
+);
