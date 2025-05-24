@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/report/presentation/screen/report_edit_screen.dart';
+import 'package:pantau_app/features/report/presentation/screen/report_screen.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 
@@ -187,53 +189,78 @@ class WorkOrderCard extends ConsumerWidget {
                 title: const Text('Selesai'),
                 onTap: () {
                   Navigator.pop(context);
-                  if (workOrder.status != 'selesai') {
+                  if (workOrder.status != 'selesai' && workOrder.afterPhoto == null && workOrder.note == null) {
                     Navigator.pushNamed(
                       context, 
-                      '/workorder/report',
-                      arguments: workOrder.id,
+                      ReportScreen.route,
+                      arguments: {
+                        'workOrderId': workOrder.id,
+                        'isTerkendala': false,
+                      },
                     );
-                  } else if (workOrder.status != 'selesai' && workOrder.afterPhoto == null) {
-                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'selesai');
+                  } else if (workOrder.status != 'selesai' && (workOrder.afterPhoto != null || workOrder.note != null)) {
+                    Navigator.pushNamed(
+                      context,
+                      EditReportScreen.route,
+                      arguments: {
+                        'workOrderId': workOrder.id,
+                        'isTerkendala': false,
+                        'status': 'selesai',
+                      },
+                    );
                   }
                 },
               ),
               ListTile(
                 title: const Text('Terkendala'),
                 onTap: () {
+                  Navigator.pop(context);
                   if (workOrder.status == 'selesai') {
-                    Navigator.pop(context);
                     _showConfirmDialog(context, ref, 'terkendala');
-                  } else {
-                    ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'terkendala');
-                    Navigator.pop(context);
+                  } else if (workOrder.status != 'terkendala' && workOrder.afterPhoto == null && workOrder.note == null) {
+                    Navigator.pushNamed(
+                      context, 
+                      ReportScreen.route,
+                      arguments: {
+                        'workOrderId': workOrder.id,
+                        'isTerkendala': true,
+                      },
+                    );
+                  } else if (workOrder.status != 'terkendala' && (workOrder.afterPhoto != null || workOrder.note != null)) {
+                    Navigator.pushNamed(
+                      context, 
+                      EditReportScreen.route,
+                      arguments: {
+                        'workOrderId': workOrder.id,
+                        'isTerkendala': true,
+                        'status': 'terkendala',
+                      },
+                    );
                   }
                 },
               ),
               ListTile(
                 title: const Text('Dalam Pengerjaan'),
                 onTap: () {
+                  Navigator.pop(context);
                   if (workOrder.status == 'selesai') {
-                    Navigator.pop(context);
                     _showConfirmDialog(context, ref, 'dalam_pengerjaan');
-                  } else {
+                  } else if (workOrder.status != 'dalam_pengerjaan') {
                     ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'dalam_pengerjaan');
                     if (workOrder.startTime == null) {
                       ref.read(workOrderViewModelProvider.notifier).updateStartTime(workOrder.id);
                     }
-                    Navigator.pop(context);
                   }
                 },
               ),
               ListTile(
                 title: const Text('Belum Mulai'),
                 onTap: () {
+                  Navigator.pop(context);
                   if (workOrder.status == 'selesai') {
-                    Navigator.pop(context);
                     _showConfirmDialog(context, ref, 'belum_mulai');
-                  } else {
+                  } else if (workOrder.status != 'belum_mulai') {
                     ref.read(workOrderViewModelProvider.notifier).updateWorkOrderStatus(workOrder.id, 'belum_mulai');
-                    Navigator.pop(context);
                   }
                 },
               ),

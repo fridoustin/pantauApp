@@ -38,11 +38,23 @@ Route<dynamic> routeGenerators(RouteSettings settings) {
       final workOrder = settings.arguments as WorkOrder;
       return _buildPageRoute(WorkOrderEditScreen(workOrder: workOrder));
     case ReportScreen.route :
-      final workOrderId = settings.arguments as String;
-      return _buildPageRoute(ReportScreen(workOrderId: workOrderId));
+      final args = settings.arguments as Map<String, dynamic>;
+      final workOrderId = args['workOrderId'] as String;
+      final isTerkendala = args['isTerkendala'] as bool;
+      return _buildPageRoute(ReportScreen(
+        workOrderId: workOrderId,
+        isTerkendala: isTerkendala,
+      ));
     case EditReportScreen.route :
-      final workOrderId = settings.arguments as String;
-      return _buildPageRoute(EditReportScreen(workOrderId: workOrderId));
+      final args = settings.arguments as Map<String, dynamic>;
+      final workOrderId = args['workOrderId'] as String;
+      final isTerkendala = args['isTerkendala'] as bool;
+      final status = args['status'] as String?;
+      return _buildPageRoute(EditReportScreen(
+        workOrderId: workOrderId,
+        isTerkendala: isTerkendala,
+        status: status,
+      ));
     default:
       throw ('Route not found');
   }  

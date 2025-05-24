@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/report/presentation/screen/report_edit_screen.dart';
+import 'package:pantau_app/features/report/presentation/screen/report_screen.dart';
 import 'package:pantau_app/features/report/presentation/widget/report_section_widget.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
@@ -84,8 +86,9 @@ class WorkOrderDetailScreen extends ConsumerWidget {
           _buildStatusSection(context, ref, workOrder),
           const SizedBox(height: 24),
 
-          // Report section
-          ReportSection(workOrderId: workOrderId),
+          if (workOrder.status == 'terkendala' || workOrder.status == 'selesai')
+            // Report section
+            ReportSection(workOrder: workOrder),
           
           // Action buttons
           _buildActionButtons(context, ref, workOrder),          
@@ -592,11 +595,24 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                   return Expanded(
                     child: InkWell(
                       onTap: () {
-                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai' && workOrder.afterPhoto == null) {
+                        if (statuses[index] == 'selesai' && workOrder.status != 'selesai' && workOrder.afterPhoto == null && workOrder.note == null) {
                           Navigator.pushNamed(
                             context, 
-                            '/workorder/report',
-                            arguments: workOrder.id,
+                            ReportScreen.route,
+                            arguments: {
+                              'workOrderId': workOrderId,
+                              'isTerkendala': false,
+                            },
+                          );
+                        } else if (statuses[index] == 'selesai' && workOrder.status != 'selesai' && (workOrder.afterPhoto != null || workOrder.note != null)) {
+                          Navigator.pushNamed(
+                            context,
+                            EditReportScreen.route,
+                            arguments: {
+                              'workOrderId': workOrderId,
+                              'isTerkendala': false,
+                              'status': statuses[index],
+                            },
                           );
                         } else if (statuses[index] != 'selesai' && workOrder.status == 'selesai') {
                           showDialog(
@@ -628,8 +644,26 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
                               ],
                             ),
                           );
-                        }
-                        else {
+                        } else if (statuses[index] == 'terkendala' && workOrder.status != 'terkendala' && workOrder.afterPhoto == null && workOrder.note == null) {
+                          Navigator.pushNamed(
+                            context, 
+                            ReportScreen.route,
+                            arguments: {
+                              'workOrderId': workOrderId,
+                              'isTerkendala': true,
+                            },
+                          );
+                        } else if (statuses[index] == 'terkendala' && workOrder.status != 'terkendala' && (workOrder.afterPhoto != null || workOrder.note != null)) {
+                          Navigator.pushNamed(
+                            context, 
+                            EditReportScreen.route,
+                            arguments: {
+                              'workOrderId': workOrderId,
+                              'isTerkendala': true,
+                              'status': statuses[index],
+                            },
+                          );
+                        } else {
                           _updateStatus(ref, workOrder.id, workOrder.startTime, statuses[index]);
                         }
                       },
