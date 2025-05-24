@@ -12,10 +12,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ReportScreen extends ConsumerStatefulWidget {
   static const String route = '/workorder/report';
   final String workOrderId;
+  final bool isTerkendala;
 
   const ReportScreen({
     super.key,
     required this.workOrderId,
+    required this.isTerkendala,
   });
 
   @override
@@ -175,24 +177,31 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
-  Future<void> _submitReport(WorkOrder workOrder) async {
+  Future<void> _submitReport(WorkOrder workOrder, bool isTerkendala) async {
     if (!_formKey.currentState!.validate()) return;
-    if (_afterImage == null) {
-      _showSnackBar('Gambar sesudah wajib diunggah!', isError: true);
+  
+    if (_afterImage == null && !isTerkendala) {
+      _showSnackBar('Gambar sesudah harus diunggah!', isError: true);
+      return;
+    } else if (_noteController.text.trim().isEmpty && isTerkendala) {
+      _showSnackBar('Detail kendala harus diisi!', isError: true);
       return;
     }
 
     setState(() => _isLoading = true);
     try {
       String? beforeUrl;
+      String? afterUrl;
       if (_beforeImage != null) {
         final beforePath = _generatePath(
-            'before', _beforeImage!.path, workOrder.title);
+          'before', _beforeImage!.path, workOrder.title);
         beforeUrl = await _uploadFile(_beforeImage!, beforePath);
       }
-      final afterPath = _generatePath(
+      if (_afterImage != null) {
+        final afterPath = _generatePath(
           'after', _afterImage!.path, workOrder.title);
-      final afterUrl = await _uploadFile(_afterImage!, afterPath);
+        afterUrl = await _uploadFile(_afterImage!, afterPath);
+      }
 
       final supabase = Supabase.instance.client;
       final payload = <String, dynamic>{
@@ -218,7 +227,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
       await ref
           .read(workOrderViewModelProvider.notifier)
-          .updateWorkOrderStatus(workOrder.id, 'selesai');
+          .updateWorkOrderStatus(workOrder.id, isTerkendala ? 'terkendala' : 'selesai');
       
       // refresh report widget
       ref.invalidate(workOrderReportsProvider(widget.workOrderId));
@@ -246,7 +255,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     );
   }
 
-  Widget _imageContainer(File? image, bool isAfter) {
+  Widget _imageContainer(File? image, bool isAfter, bool isTerkendala) {
     return Container(
       width: double.infinity,
       height: 200,
@@ -308,9 +317,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isAfter
-                      ? 'Add after photo'
-                      : 'Add before photo (Optional)',
+                  isTerkendala 
+                      ? 'Add photo (Optional)'
+                      : isAfter
+                          ? 'Add after photo'
+                          : 'Add before photo (Optional)',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.black.withValues(alpha: 0.7),
@@ -384,6 +395,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   }
 
   Widget _buildReportScreen(WorkOrder workOrder) {
+    final bool isTerkendala = widget.isTerkendala;
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -409,11 +421,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildImagesSection(),
+              _buildImagesSection(isTerkendala),
               const SizedBox(height: 20),
-              _buildNoteSection(),
+              _buildNoteSection(isTerkendala),
               const SizedBox(height: 24),
-              _buildSubmitButton(workOrder),
+              _buildSubmitButton(workOrder, isTerkendala),
             ],
           ),
         ),
@@ -421,7 +433,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     );
   }
 
-  Widget _buildImagesSection() {
+  Widget _buildImagesSection(bool isTerkendala) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -434,61 +446,80 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Before',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppColors.black,
+        if (!isTerkendala) ...[
+          const Text(
+            'Before',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: _isLoading ? null : () => _showImageSourceDialog(false),
-          child: _imageContainer(_beforeImage, false),
-        ),
-        const SizedBox(height: 16),
-        const Row(
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: _isLoading ? null : () => _showImageSourceDialog(false),
+            child: _imageContainer(_beforeImage, false, isTerkendala),
+          ),
+          const SizedBox(height: 16),
+        ],
+        Row(
           children: [
             Text(
-              'After',
-              style: TextStyle(
+              isTerkendala
+                  ? 'Photo'
+                  : 'After',
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: AppColors.black,
               ),
             ),
-            SizedBox(width: 4),
-            Text(
-              '*',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.errorColor,
+            const SizedBox(width: 4),
+            if (!isTerkendala)
+              const Text(
+                '*',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.errorColor,
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: _isLoading ? null : () => _showImageSourceDialog(true),
-          child: _imageContainer(_afterImage, true),
+          child: _imageContainer(_afterImage, true, isTerkendala),
         ),
       ],
     );
   }
 
-  Widget _buildNoteSection() {
+  Widget _buildNoteSection(bool isTerkendala) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Note',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-          ),
+        Row(
+          children: [
+            const Text(
+              'Note',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(width: 4),
+            if (isTerkendala)
+              const Text(
+                '*',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.errorColor,
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -528,9 +559,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     );
   }
 
-  Widget _buildSubmitButton(WorkOrder workOrder) {
+  Widget _buildSubmitButton(WorkOrder workOrder, bool isTerkendala) {
     return ElevatedButton(
-      onPressed: _isLoading ? null : () => _submitReport(workOrder),
+      onPressed: _isLoading ? null : () => _submitReport(workOrder, isTerkendala),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryColor,
         padding: const EdgeInsets.symmetric(vertical: 16),
