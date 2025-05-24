@@ -11,10 +11,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class EditReportScreen extends ConsumerStatefulWidget {
   static const String route = '/workorder/report_edit';
   final String workOrderId;
+  final bool isTerkendala;
+  final String? status;
 
   const EditReportScreen({
     super.key,
     required this.workOrderId,
+    required this.isTerkendala,
+    this.status,
   });
 
   @override
@@ -62,7 +66,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
       final supabase = Supabase.instance.client;
       final res = await supabase
           .from('workorder')
-          .select('id, before_url, after_url, note')
+          .select('id, before_url, after_url, note, report_created_at')
           .eq('id', widget.workOrderId)
           .single();
 
@@ -212,7 +216,28 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
     }
   }
 
+  bool _validateFields() {
+    if (widget.isTerkendala) {
+      // terkendala, note harus diisi
+      if (_noteController.text.trim().isEmpty) {
+        _showSnackBar('Detail kendala harus diisi!', isError: true);
+        return false;
+      }
+    } else {
+      // selesai, after photo harus diisi
+      if (_newAfter == null && _afterUrl == null) {
+        _showSnackBar('Gambar sesudah harus diunggah!', isError: true);
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> _updateReport(String title) async {
+    if (!_validateFields()) {
+      return;
+    }
+    
     final reportId = _reportId;
     if (reportId == null) {
       _showSnackBar('Data report tidak ditemukan', isError: true);
@@ -253,6 +278,12 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
       // Handle note
       updates['note'] = _noteController.text.trim();
 
+      updates['report_created_at'] = DateTime.now().toIso8601String();
+
+      if (widget.status != null) {
+        updates['status'] = widget.status;
+      }
+
       if (updates.isNotEmpty) {
         await supabase.from('workorder').update(updates).eq('id', reportId);
         _showSnackBar('Report berhasil diperbarui!', isError: false);
@@ -286,6 +317,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
     String? existingUrl, 
     File? newImage,
     bool isRequired = false,
+    required bool isTerkendala,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,7 +363,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
               ? _buildNewImagePreview(newImage, isAfter)
               : existingUrl != null 
                 ? _buildExistingImagePreview(existingUrl, isAfter)
-                : _buildEmptyImagePlaceholder(isAfter),
+                : _buildEmptyImagePlaceholder(isAfter, isTerkendala),
           ),
         ),
       ],
@@ -449,7 +481,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
     );
   }
 
-  Widget _buildEmptyImagePlaceholder(bool isAfter) {
+  Widget _buildEmptyImagePlaceholder(bool isAfter, bool isTerkendala) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -460,9 +492,11 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          isAfter
-              ? 'Add after photo'
-              : 'Add before photo (Optional)',
+          isTerkendala 
+              ? 'Add photo (Optional)'
+              : isAfter
+                  ? 'Add after photo'
+                  : 'Add before photo (Optional)',
           style: TextStyle(
             fontSize: 14,
             color: AppColors.black.withValues(alpha: 0.7),
@@ -568,22 +602,26 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildImageSection(
-              title: 'Before',
-              isAfter: false,
-              existingUrl: _beforeUrl,
-              newImage: _newBefore,
-            ),
-            const SizedBox(height: 16),
+            if (!widget.isTerkendala) ...[
+              _buildImageSection(
+                title: 'Before',
+                isAfter: false,
+                existingUrl: _beforeUrl,
+                newImage: _newBefore,
+                isTerkendala: widget.isTerkendala
+              ),
+              const SizedBox(height: 16),
+            ],
             _buildImageSection(
               title: 'After',
               isAfter: true,
               existingUrl: _afterUrl,
               newImage: _newAfter,
-              isRequired: true,
+              isRequired: !widget.isTerkendala,
+              isTerkendala: widget.isTerkendala
             ),
             const SizedBox(height: 20),
-            _buildNoteSection(),
+            _buildNoteSection(widget.isTerkendala),
             const SizedBox(height: 24),
             _buildUpdateButton(workOrder),
           ],
@@ -592,17 +630,31 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
     );
   }
 
-  Widget _buildNoteSection() {
+  Widget _buildNoteSection(bool isTerkendala) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Note',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-          ),
+        Row(
+          children: [
+            const Text(
+              'Note',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(width: 4),
+            if (isTerkendala)
+              const Text(
+                '*',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.errorColor,
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         TextFormField(

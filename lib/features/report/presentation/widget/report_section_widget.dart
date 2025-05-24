@@ -4,23 +4,25 @@ import 'package:intl/intl.dart';
 import 'package:pantau_app/core/constant/colors.dart';
 import 'package:pantau_app/features/report/domain/report.dart';
 import 'package:pantau_app/features/report/presentation/providers/report_providers.dart';
+import 'package:pantau_app/features/report/presentation/screen/report_edit_screen.dart';
+import 'package:pantau_app/features/work/domain/models/work_order.dart';
 
 class ReportSection extends ConsumerWidget {
   static const String route = '/workorder/report_screen';
-  final String workOrderId;
+  final WorkOrder workOrder;
 
   const ReportSection({
     super.key,
-    required this.workOrderId,
+    required this.workOrder,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reportsAsync = ref.watch(workOrderReportsProvider(workOrderId));
+    final reportsAsync = ref.watch(workOrderReportsProvider(workOrder.id));
 
     return reportsAsync.when(
       data: (reports) {
-        if (reports[0].afterPhoto == null) {
+        if (reports[0].afterPhoto == null && reports[0].note == null) {
           return const SizedBox.shrink();
         } else {
         return _buildReportsList(context, reports);
@@ -204,8 +206,11 @@ class ReportSection extends ConsumerWidget {
             onPressed: () {
               Navigator.pushNamed(
                 context,
-                '/workorder/report_edit',
-                arguments: workOrderId
+                EditReportScreen.route,
+                arguments: {
+                  'workOrderId': workOrder.id,
+                  'isTerkendala': workOrder.status == 'terkendala',
+                },
               );
             },
             icon: const Icon(Icons.edit_outlined, size: 18),
