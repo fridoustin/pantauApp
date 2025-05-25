@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/core/route/route.dart';
-import 'package:pantau_app/features/splash/splash_screen.dart';
+import 'package:pantau_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:pantau_app/features/home/presentation/screens/home_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_core/firebase_core.dart';
@@ -36,10 +37,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: _getInitialScreen(),
       onGenerateRoute: routeGenerators,
     );
+  }
+
+  Widget _getInitialScreen() {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      return const HomeScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }
