@@ -51,6 +51,7 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_messaging: ^15.2.5
   flutter_slidable: ^4.0.0
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +64,6 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.12.0
-  flutter_native_splash: ^2.2.19
 
 flutter_icons:
   android: true
@@ -71,14 +71,15 @@ flutter_icons:
   image_path: "assets/images/pantau.png"  
 
 flutter_native_splash:
-  color: "#FFFFFF"            
-  image: assets/images/pantau.png 
+  color: "#FFFFFF"
+  image: assets/images/pantau.png
   android: true
   ios: true
   fullscreen: true
-  # jika perlu atur lebar/tinggi:
-  image_width: 360
-  image_height: 640
+
+  android_12:
+    image: assets/images/pantau_android12.png
+    color: "#FFFFFF"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
