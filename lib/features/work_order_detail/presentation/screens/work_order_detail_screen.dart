@@ -7,6 +7,7 @@ import 'package:pantau_app/features/report/presentation/screen/report_edit_scree
 import 'package:pantau_app/features/report/presentation/screen/report_screen.dart';
 import 'package:pantau_app/features/report/presentation/widget/report_section_widget.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
+import 'package:pantau_app/features/work/presentation/providers/admin_provider.dart';
 import 'package:pantau_app/features/work/presentation/viewmodels/work_order_viewmodel.dart';
 import 'package:pantau_app/features/work_order_detail/presentation/providers/work_order_detail_provider.dart';
 
@@ -430,123 +431,187 @@ class WorkOrderDetailScreen extends ConsumerWidget {
     );
   }
   
-Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
-  return Card(
-    elevation: 0,
-    color: AppColors.cardColor,
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
+  Widget _buildInformationCard(BuildContext context, WorkOrder workOrder) {
+    return Card(
+      elevation: 0,
+      color: AppColors.cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.info_outline, color: AppColors.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Additional Information',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoItem(
+                        context, 
+                        'Category',
+                        _getCategoryName(workOrder.categoryId),
+                        Icons.location_on_outlined,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildInfoItem(
+                        context, 
+                        'Created',
+                        DateFormat('dd MMM yyyy').format(workOrder.createdAt),
+                        Icons.event_available,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoItem(
+                        context, 
+                        'Last Updated',
+                        workOrder.updatedAt != null 
+                          ? DateFormat('dd MMM yyyy').format(workOrder.updatedAt!) 
+                          : 'Never updated',
+                        Icons.update,
+                      ),
+                    ),
+                    if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
+                      const SizedBox(width: 16),
+                    if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
+                      Expanded(
+                        child: _buildAdminInfoItem(context, workOrder.adminId!),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(BuildContext context, String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.cardColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline, color: AppColors.primaryColor),
-              const SizedBox(width: 8),
+              Icon(icon, size: 14, color: Colors.grey[600]),
+              const SizedBox(width: 4),
               Text(
-                'Additional Information',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
                 ),
               ),
             ],
           ),
-          const Divider(height: 24),
-          
-          Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoItem(
-                      context, 
-                      'Category',
-                      _getCategoryName(workOrder.categoryId),
-                      Icons.location_on_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildInfoItem(
-                      context, 
-                      'Created',
-                      DateFormat('dd MMM yyyy').format(workOrder.createdAt),
-                      Icons.event_available,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoItem(
-                      context, 
-                      'Last Updated',
-                      workOrder.updatedAt != null 
-                        ? DateFormat('dd MMM yyyy').format(workOrder.updatedAt!) 
-                        : 'Never updated',
-                      Icons.update,
-                    ),
-                  ),
-                  if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
-                    const SizedBox(width: 16),
-                  if (workOrder.adminId != null && workOrder.adminId!.isNotEmpty)
-                    Expanded(
-                      child: _buildInfoItem(
-                        context, 
-                        'Admin ID',
-                        _formatAdminId(workOrder.adminId!),
-                        Icons.admin_panel_settings,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+          const SizedBox(height: 4),
+          Text(
+            value.isEmpty ? '-' : value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
-// Tetap sama seperti sebelumnya
-Widget _buildInfoItem(BuildContext context, String label, String value, IconData icon) {
-  return Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: AppColors.cardColor,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: Colors.grey[600]),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value.isEmpty ? '-' : value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
+  Widget _buildAdminInfoItem(BuildContext context, String adminId) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final adminAsyncValue = ref.watch(adminByIdProvider(adminId));
+        
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.cardColor,
+            borderRadius: BorderRadius.circular(8),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    ),
-  );
-}
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.admin_panel_settings, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Admin',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              adminAsyncValue.when(
+                data: (admin) => Text(
+                  admin?.name ?? _formatAdminId(adminId),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                loading: () => const SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                  ),
+                ),
+                error: (_, __) => Text(
+                  'Error loading admin',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatAdminId(String adminId) {
+    // Show only first 8 characters of admin ID if it's too long
+    if (adminId.length > 10) {
+      return '${adminId.substring(0, 8)}...';
+    }
+    return adminId;
+  }
   
   Widget _buildStatusSection(BuildContext context, WidgetRef ref, WorkOrder workOrder) {
     final statuses = ['belum_mulai', 'dalam_pengerjaan', 'terkendala', 'selesai'];
@@ -834,14 +899,6 @@ Widget _buildInfoItem(BuildContext context, String label, String value, IconData
     };
     
     return categories[categoryId] ?? (categoryId != null ? 'Category #$categoryId' : '');
-  }
-  
-  String _formatAdminId(String adminId) {
-    // Show only first 8 characters of admin ID if it's too long
-    if (adminId.length > 10) {
-      return '${adminId.substring(0, 8)}...';
-    }
-    return adminId;
   }
   
   String _getTimeAgo(DateTime dateTime) {
