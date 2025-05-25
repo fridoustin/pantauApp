@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantau_app/common/widgets/custom_app_bar.dart';
 import 'package:pantau_app/common/widgets/navBar/navigation_bar.dart';
 import 'package:pantau_app/core/constant/colors.dart';
+import 'package:pantau_app/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:pantau_app/features/home/presentation/widgets/category_statistic_card.dart';
 import 'package:pantau_app/features/work/domain/models/work_order.dart';
 import 'package:pantau_app/features/work/presentation/providers/work_order_provider.dart';
@@ -116,9 +117,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildError(Object error) {
     return Center(
-      child: Text(
-        'Error: ${error.toString()}',
-        style: const TextStyle(color: AppColors.errorColor),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.errorColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Terjadi kesalahan',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            // const SizedBox(height: 8),
+            // Text(
+            //   'Error: ${error.toString()}',
+            //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            //     color: Colors.grey[600],
+            //   ),
+            //   textAlign: TextAlign.center,
+            // ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                // Refresh all providers
+                ref.invalidate(workOrdersProvider);
+                ref.invalidate(monthWorkOrdersProvider);
+                // ref.invalidate(homeStatisticsProvider);
+                // ref.invalidate(todayWorkOrdersProvider);
+                // ref.invalidate(overdueWorkOrdersProvider);
+              },
+              icon: const Icon(
+                Icons.refresh,
+                color: Colors.white
+              ),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

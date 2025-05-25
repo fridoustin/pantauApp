@@ -176,22 +176,57 @@ class WorkScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primaryColor)),
               error: (e, _) => Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: AppColors.errorColor),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: AppColors.errorColor,
+                      ),
                       const SizedBox(height: 16),
                       Text(
-                        'Error loading work orders',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        'Terjadi kesalahan',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        e.toString(),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
+                      // const SizedBox(height: 8),
+                      // Text(
+                      //   'Error: ${error.toString()}',
+                      //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //     color: Colors.grey[600],
+                      //   ),
+                      //   textAlign: TextAlign.center,
+                      // ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          final currentMode = ref.read(workModeProvider);
+                          if (currentMode == WorkMode.todo) {
+                            ref.invalidate(toDoWorkOrdersProvider);
+                          } else {
+                            ref.invalidate(historyWorkOrdersProvider);
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.refresh,
+                          color: Colors.white
+                        ),
+                        label: const Text('Coba Lagi'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                       ),
                     ],
                   ),

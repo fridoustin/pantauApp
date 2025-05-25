@@ -1,14 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantau_app/features/create_work_order/data/datasources/category_remote_data_source.dart';
 import 'package:pantau_app/features/create_work_order/data/datasources/work_order_remote_data_source.dart';
-import 'package:pantau_app/features/create_work_order/data/repositories/category_repository_impl.dart';
 import 'package:pantau_app/features/create_work_order/data/repositories/work_order_repository_impl.dart';
-import 'package:pantau_app/features/create_work_order/domain/entities/category.dart';
 import 'package:pantau_app/features/create_work_order/domain/entities/work_order.dart';
 import 'package:pantau_app/features/create_work_order/domain/usecases/add_work_order.dart';
-import 'package:pantau_app/features/create_work_order/domain/usecases/get_categories.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 final supabaseProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
 
@@ -22,13 +17,6 @@ final addWorkOrderUseCaseProvider = Provider((ref) => AddWorkOrder(ref.read(work
 final createWorkOrderProvider = StateNotifierProvider<CreateWorkOrderNotifier, AsyncValue<void>>(
   (ref) => CreateWorkOrderNotifier(ref.read(addWorkOrderUseCaseProvider)),
 );
-
-final categoryListProvider = FutureProvider<List<Category>>((ref) {
-  final client = ref.read(supabaseProvider);
-  final ds = CategoryRemoteDataSource(client);
-  final repo = CategoryRepositoryImpl(ds);
-  return GetCategories(repo)();
-});
 
 class CreateWorkOrderNotifier extends StateNotifier<AsyncValue<void>> {
   final AddWorkOrder _addWorkOrder;

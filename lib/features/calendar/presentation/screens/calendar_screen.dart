@@ -106,7 +106,60 @@ class CalendarScreen extends ConsumerWidget {
                           );
                         },
                         loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (err, stack) => Center(child: Text('Error loading calendar: $err')),
+                        error: (err, stack) => Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: AppColors.errorColor,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Terjadi kesalahan',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                // const SizedBox(height: 8),
+                                // Text(
+                                //   'Error: ${err.toString()}',
+                                //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                //     color: Colors.grey[600],
+                                //   ),
+                                //   textAlign: TextAlign.center,
+                                // ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Refresh the provider
+                                    ref.invalidate(monthWorkOrdersProvider(DateTime(selectedDate.year, selectedDate.month)));
+                                  },
+                                  icon: const Icon(
+                                    Icons.refresh,
+                                    color: Colors.white
+                                  ),
+                                  label: const Text('Coba Lagi'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
