@@ -160,32 +160,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               textInputAction: TextInputAction.done,
                               onSubmitted: (_) => login(),
                             ),
-                            const SizedBox(height: 10),
+                            // const SizedBox(height: 10),
               
-                            Row(
-                              children: [
-                                Transform.scale(
-                                  scale: 1.2,
-                                  child: Checkbox(
-                                    value: _rememberMe,
-                                    activeColor: Colors.blue[800],
-                                    checkColor: Colors.white,
-                                    onChanged: (bool? newValue) {
-                                      setState(() {
-                                        _rememberMe = newValue ?? false;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Text(
-                                  'Remember me',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // Row(
+                            //   children: [
+                            //     Transform.scale(
+                            //       scale: 1.2,
+                            //       child: Checkbox(
+                            //         value: _rememberMe,
+                            //         activeColor: Colors.blue[800],
+                            //         checkColor: Colors.white,
+                            //         onChanged: (bool? newValue) {
+                            //           setState(() {
+                            //             _rememberMe = newValue ?? false;
+                            //           });
+                            //         },
+                            //       ),
+                            //     ),
+                            //     Text(
+                            //       'Remember me',
+                            //       style: TextStyle(
+                            //         color: Colors.grey[600],
+                            //         fontSize: 16,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
                           ],
                         ),
         
