@@ -309,11 +309,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         label: 'Change Password',
                         onTap: () => Navigator.pushNamed(context, '/changepassword')
                       ),
-                      const Divider(),
-                      const ProfileOption(
-                        icon: 'assets/icons/settings.svg',
-                        label: 'Settings',
-                      ),
+                      // const Divider(),
+                      // const ProfileOption(
+                      //   icon: 'assets/icons/settings.svg',
+                      //   label: 'Settings',
+                      // ),
                       const SizedBox(height: 40),
                       // Logout button
                       SizedBox(
