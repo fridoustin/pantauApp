@@ -296,7 +296,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(height: 24),
         CategoryStatisticsCard(
-          title: 'Today Category Distribution',
+          title: 'Today Location Distribution',
           floorStats: stats,
           isToday: true,
         ),
@@ -365,7 +365,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(height: 24),
         CategoryStatisticsCard(
-          title: 'Category Distribution',
+          title: 'Location Distribution',
           floorStats: stats,
           isToday: false,
         ),
