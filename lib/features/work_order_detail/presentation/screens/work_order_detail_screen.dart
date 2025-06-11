@@ -461,7 +461,7 @@ class WorkOrderDetailScreen extends ConsumerWidget {
                     Expanded(
                       child: _buildInfoItem(
                         context, 
-                        'Category',
+                        'Location',
                         _getCategoryName(workOrder.categoryId),
                         Icons.location_on_outlined,
                       ),

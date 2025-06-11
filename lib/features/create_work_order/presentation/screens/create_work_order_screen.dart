@@ -164,7 +164,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
             const SizedBox(height: 20),
             
             // Category Dropdown
-            _buildFieldLabel('Category'),
+            _buildFieldLabel('Location'),
             const SizedBox(height: 8),
             _buildCategoryDropdown(),
           ],
@@ -229,7 +229,7 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
         },
         icon: const Icon(Icons.keyboard_arrow_down),
         isExpanded: true,
-        hint: const Text('Select a category'),
+        hint: const Text('Select location'),
       ),
     );
   }
